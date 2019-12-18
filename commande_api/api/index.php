@@ -15,7 +15,7 @@ $db->bootEloquent();           	/* établir la connexion */
 $configuration = new \Slim\Container(['settings' => ['displayErrorDetails' => true]]);
 $app = new \Slim\App($configuration);
 
-$app->get('/commandes', \lbs\command\control\CommandesController::class.':getCommands');
+$app->get('/commandes[/]', \lbs\command\control\CommandesController::class.':getCommands');
 
 $app->get('/commandes/{id}[/]', \lbs\command\control\CommandesController::class.':getCommand')
 		->setName('commande_api');

@@ -2,6 +2,8 @@
 
 namespace lbs\command\control;
 
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use MongoDB\Driver\WriteError;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
@@ -12,9 +14,11 @@ class CommandesController {
 		$this->c = $c;
 	}
 
-	public function getCommands(Request $req, Response $resp, array $args) : Response {
+	public function getCommands(Request $req, Response $resp, array $args) {
 
-		$cde = \lbs\command\model\Commande::all();
+        try {
+
+	    $cde = \lbs\command\model\Commande::all();
 
 		$rs = $resp->withStatus(200)
 					->withHeader('Content-Type', 'application/json;charset=utf-8');
@@ -24,30 +28,36 @@ class CommandesController {
 					"count" => $cde,
 					"commandes" => $cde]));
 
-		return $rs;
+            return $rs;
+        }catch (\Exception $e){
+            echo "HOla";
+            return Writer::json_error($rs, 404, $e->getMessage());
+        }
+
 	}
 
-	public function getCommand(Request $req, Response $resp, array $args) : Response {
+	public function getCommand(Request $req, Response $resp, array $args) {
+        try {
+            $id = $args['id'];
 
-		/*$cde = [
-			["id" => "AuTR4-65ZTY", "mail_client" => "jan.neymar@yaboo.fr", "date_commande" => "2019-12-25", "montant" => 25.95
-						],
-			["id" => "657GT-I8G443", "mail_client" => "jan.neplin@gmal.fr", "date_commande" => "2019-11-27", "montant" => 42.95
-						],
-			["id" => "K9J67-4D6F5", "mail_client" => "claude.francois@grorange.fr", "date_commande" => "2019-12-07", "montant" => 14.95
-			]
-		];*/
+            $cde = \lbs\command\model\Commande::findOrFail($id);
 
-		$cde = \lbs\command\model\Commande::first();
+            $rs = $resp->withStatus(200)
+                ->withHeader('Content-Type', 'application/json;charset=utf-8');
 
-		$rs = $resp->withStatus(200)
-					->withHeader('Content-Type', 'application/json;charset=utf-8');
+            $rs->getBody()->write(json_encode([
+                "type" => "collection",
+                "commandes" => $cde]));
 
-		$rs->getBody()->write(json_encode([
-					"type" => "collection",
-					"count" => $cde,
-					"commandes" => $cde]));
+            return $rs;
 
-		return $rs;
+        }catch(ModelNotFoundException $e){
+
+            $rs = $resp->withStatus(404)
+                ->withHeader('Content-Type', 'application/json;charset=utf-8');
+            $rs->getBody()->write(json_encode(['Error_code'=>404, 'Error message'=>$e->getMessage()]));
+
+            return $rs;
+        }
 	}
 }
