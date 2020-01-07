@@ -14,6 +14,11 @@ $db->bootEloquent();           	/* établir la connexion */
 $configuration = new \Slim\Container(['settings' => ['displayErrorDetails' => true]]);
 $app = new \Slim\App($configuration);
 
+$container = $app->getContainer();
+$container["errorHandler"] = function ($container) {
+    return new CustomHandler;
+};
+
 $app->get('/commandes[/]', \lbs\command\control\CommandesController::class.':getCommands');
 
 $app->get('/commandes/{id}[/]', \lbs\command\control\CommandesController::class.':getCommand')
