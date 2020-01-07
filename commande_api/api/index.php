@@ -3,7 +3,8 @@ require '../src/vendor/autoload.php';
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use \lbs\common\bootstrap\Eloquent;
+
+$errors = require_once __DIR__. '/errors/Errors.php';
 
 $config = parse_ini_file("conf/conf.ini");
 	/* une instance de connexion  */
