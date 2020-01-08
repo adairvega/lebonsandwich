@@ -30,7 +30,6 @@ class CommandesController {
 
             return $rs;
         }catch (\Exception $e){
-            echo "HOla";
             return Writer::json_error($rs, 404, $e->getMessage());
         }
 
@@ -40,7 +39,7 @@ class CommandesController {
         try {
             $id = $args['id'];
 
-            $cde = \lbs\command\model\Commande::findOrFail($id);
+            $cde = \lbs\command\model\Commande::findOrFail($i);
 
             $rs = $resp->withStatus(200)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
@@ -55,7 +54,9 @@ class CommandesController {
 
             $rs = $resp->withStatus(404)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
-            $rs->getBody()->write(json_encode(['Error_code'=>404, 'Error message'=>$e->getMessage()]));
+            $rs->getBody()
+                ->write(json_encode(['Error_code'=>404, 'Error message'=>$e
+                ->getMessage()]));
 
             return $rs;
         }
