@@ -61,4 +61,35 @@ class CommandesController {
             return $rs;
         }
 	}
+
+    public function createCommand(Request $req, Response $resp, array $args){
+
+        $cde_data = $req->getParsedBody();
+
+        try{
+
+            $new_cde = new \lbs\command\model\Commande;
+            //construire un token d'authentification aléatoire
+            $new_cde->id = Uuid::uuid4();
+            //supprime les caractères spéciaux d'une chaîne de caractères
+            $new_cde->nom = filter_var($cde_data['nom_client'], FILTER_SANITIZE_STRING);
+            //supprime les caractères qui ne font pas partie d'une adresse email
+            $new_cde->mail = filter_var($cde_data['mail_client'], FILTER_SANITIZE_EMAIL);
+            $new_cde->livraison = DateTime::createFromFormat('d-m-Y H:i'.$cde_data['livraison']['date'].''.$cde_data['livraison']['heure']);
+
+            $new_cde->status = \lbs\command\model\Commande::CREATED;
+
+            $new_cde->save();
+
+            return $resp->withStatus(201)
+                        ->getBody()
+                        ->write(json_encode(['commande' => $new_cde->toArray()]))
+                        ->withHeader('Location',$this->new_cde['router']
+                        ->pathFor('commande', ['id' => $c->id]));
+
+        }catch(\Exception $e){
+
+            return Writer::json_error($resp, 500, $e->getMessage());
+        }
+    }
 }

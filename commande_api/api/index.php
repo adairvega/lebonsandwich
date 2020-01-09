@@ -57,4 +57,6 @@ $app->get('/commandes[/]', \lbs\command\control\CommandesController::class.':get
 $app->get('/commandes/{id}[/]', \lbs\command\control\CommandesController::class.':getCommand')
 		->setName('commande_api');
 
+$app->post('/commandes', \lbs\command\control\CommandesController::class.':createCommand');
+
 $app->run();
