@@ -13,7 +13,7 @@ $db->bootEloquent();
 $errors = require 'errors.php';
 $configuration = new \Slim\Container(['settings' => ['displayErrorDetails' => true]]);
 $app_config = array_merge($errors);
-$app = new \Slim\App(new \Slim\Container($app_config));
+$app = new \Slim\App(new \Slim\Container($app_config,$configuration));
 
 $app->get('/commandes[/]', \lbs\command\control\CommandesController::class.':getCommands');
 $app->get('/commandes/{id}[/]', \lbs\command\control\CommandesController::class.':getCommand')->setName('commande_api');
