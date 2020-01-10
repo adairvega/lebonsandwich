@@ -17,9 +17,11 @@ return $tab = ["notAllowedHandler"=>
 },"phpErrorHandler" =>
     $c['phpErrorHandler'] = function ($c) {
         return function ($request, $response, $error) use ($c) {
-            return $response->withStatus(500)
-                ->withHeader('Content-Type', 'text/html')
-                ->write('Something went wrong!');
+            return $response->withStatus(500);
+                $resp->getBody()->write( 'error :' .$e->getMessage() )
+                    ->write( 'file : ' . $e->getFile() )
+                    ->write( 'line : ' . $e->getLine() ) ;
+                return$resp ;
         };
     },"notFoundHandler"=>
     $c['notFoundHandler']= function( $c ) {
