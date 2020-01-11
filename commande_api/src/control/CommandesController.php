@@ -102,7 +102,7 @@ class CommandesController
                         $commande_test->mail = filter_var($args['value'], FILTER_VALIDATE_EMAIL);
                         $commande_test->save();
                     } else {
-                        echo "please use a valid email";
+                        echo "please use a valid email format";
                     }
                     break;
                 case "nom":
