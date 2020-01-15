@@ -12,7 +12,7 @@ $db->addConnection($config);
 $db->setAsGlobal();
 $db->bootEloquent();
 
-$errors = require 'errors.php';
+$errors = require 'conf/errors.php';
 $configuration = new \Slim\Container(['settings' => ['displayErrorDetails' => true]]);
 $app_config = array_merge($errors);
 $app = new \Slim\App(new \Slim\Container($app_config));
