@@ -1,17 +1,25 @@
 <?php
+
 require '../src/vendor/autoload.php';
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
+<<<<<<< HEAD
 $config = parse_ini_file("conf/conf.ini");
 /* une instance de connexion  */
-$db = new Illuminate\Database\Capsule\Manager();
-$db->addConnection($config); 	/* configuration avec nos paramètres */
-$db->setAsGlobal();            	/* rendre la connexion visible dans tout le projet */
-$db->bootEloquent();           	/* établir la connexion */
+=======
 
+$config = parse_ini_file("../src/conf/conf.ini");
+>>>>>>> 92aa908e8c5e203035d0429823f34ac89022fd72
+$db = new Illuminate\Database\Capsule\Manager();
+$db->addConnection($config);
+$db->setAsGlobal();
+$db->bootEloquent();
+
+$errors = require 'conf/errors.php';
 $configuration = new \Slim\Container(['settings' => ['displayErrorDetails' => true]]);
+<<<<<<< HEAD
 
 $app = new \Slim\App($configuration);
 
@@ -60,3 +68,13 @@ $app->get('/commandes/{id}[/]', \lbs\command\control\CommandesController::class.
 $app->post('/commandes', \lbs\command\control\CommandesController::class.':createCommand');
 
 $app->run();
+=======
+$app_config = array_merge($errors);
+$app = new \Slim\App(new \Slim\Container($app_config,$configuration));
+
+$app->get('/commandes[/]', \lbs\command\control\CommandesController::class . ':getCommands');
+$app->get('/commandes/{id}[/]', \lbs\command\control\CommandesController::class . ':getCommand')->setName('commande_api');
+$app->post('/commandes/{nom}/{mail}', \lbs\command\control\CommandesController::class . ':insertCommand');
+$app->put('/commandes/{id}/{data}/{value}', \lbs\command\control\CommandesController::class . ':updateCommand');
+$app->run();
+>>>>>>> 92aa908e8c5e203035d0429823f34ac89022fd72
