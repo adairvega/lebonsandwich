@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use MongoDB\Driver\WriteError;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use \lbs\command\model\Commande as commande;
 
 class CommandesController
 {
@@ -22,19 +21,19 @@ class CommandesController
 
         try {
 
-            $cde = \lbs\command\model\Commande::all();
+            $cde = \lbs\command\model\Commande::select(['id', 'nom', 'created_at','livraison', 'status'])->get();
+            $cde_count = \lbs\command\model\Commande::all()->count();
 
             $rs = $resp->withStatus(200)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
 
             $rs->getBody()->write(json_encode([
                 "type" => "collection",
-                "count" => $cde,
-                "commandes" => $cde]));
+                "count" => $cde_count,
+                "commands"=> $cde->toArray()]));
 
             return $rs;
         } catch (\Exception $e) {
-            echo "HOla";
             return Writer::json_error($rs, 404, $e->getMessage());
         }
 
