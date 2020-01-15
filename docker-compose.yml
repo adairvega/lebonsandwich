@@ -50,6 +50,22 @@ services:
     links :
       - mongo.cat:dbcat
 
+  api.checkcommande:
+    image: canals/php:latest
+    environment:
+      - VHOST_DOCROOT=/var/www/api
+    ports:
+      - "19280:80"
+      - "19243:443"
+    volumes:
+      - ./checkcommande_api/api:/var/www/api
+      - ./checkcommande_api/src:/var/www/src
+      - ./checkcommande_api/sql:/var/www/sql
+    working_dir: /var/www/src
+    networks:
+      - lbs.net
+    links:
+      - mysql.commande:dbcom
 
 #############################
 # mysql commande  + adminer
