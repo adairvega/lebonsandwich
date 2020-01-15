@@ -85,9 +85,9 @@ class CommandesController
                 echo "please insert a valid email address";
             }
         } catch (ModelNotFoundException $e) {
-            $rs = $resp->withStatus(404)
+            $rs = $resp->withStatus(500)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
-            $rs->getBody()->write(json_encode(['Error_code' => 404, 'Error message' => $e->getMessage()]));
+            $rs->getBody()->write(json_encode(['Error_code' => 500, 'Error message' => $e->getMessage()]));
             return $rs;
         }
     }
