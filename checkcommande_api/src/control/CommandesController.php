@@ -24,6 +24,18 @@ class CommandesController
             $cde = \lbs\command\model\Commande::select(['id', 'nom', 'created_at','livraison', 'status'])->get();
             $cde_count = \lbs\command\model\Commande::all()->count();
 
+            $rows = $cde->orderBy('livraison')->get();
+            $commands = [];
+
+            foreach($rows as $row){
+                $commands[] = [
+                    'command' => $row->toArray(),
+                    'links' => [
+                        'self' => [
+                            'href' => $this->c->get('router')
+                                                ->pathFor('command', ['id'=>$row->id])]]]
+            }
+
             $rs = $resp->withStatus(200)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
 
