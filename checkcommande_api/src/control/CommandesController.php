@@ -19,25 +19,39 @@ class CommandesController
 
     public function getCommands(Request $req, Response $resp, array $args)
     {
-
         try {
-
-            $cde = \lbs\command\model\Commande::all();
-
+            $url = $_SERVER['REQUEST_URI'];
+            $parts = parse_url($url);
+            if (sizeof($parts) > 1) {
+                parse_str($parts['query'], $query);
+                $uri_key = (array_keys($query));
+                $cde = commande::where($uri_key[0], "=", $query[$uri_key[0]])->get();
+            } else {
+                $cde = commande::all();
+            }
+            $commande_count = $cde->count();
+            $orders["commandes"] = array();
+            foreach ($cde as $commande) {
+                $order = array();
+                $order["commande"]["id"] = $commande->id;
+                $order["commande"]["nom"] = $commande->nom;
+                $order["commande"]["created_at"] = $commande->created_at;
+                $order["commande"]["livraison"] = $commande->livraison;
+                $order["commande"]["status"] = $commande->status;
+                $order["links"]["self"] = array("href" => "http://api.checkcommande.local:19280/commandes/" . $commande->id);
+                $orders["commandes"][] = $order;
+            }
             $rs = $resp->withStatus(200)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
-
             $rs->getBody()->write(json_encode([
                 "type" => "collection",
-                "count" => $cde,
-                "commandes" => $cde]));
-
+                "count" => $commande_count,
+                "commandes" => $orders["commandes"]]));
             return $rs;
         } catch (\Exception $e) {
             echo "HOla";
             return Writer::json_error($rs, 404, $e->getMessage());
         }
-
     }
 
     public function getCommand(Request $req, Response $resp, array $args)
