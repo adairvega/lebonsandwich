@@ -20,6 +20,7 @@ class CommandesController
     public function getCommands(Request $req, Response $resp, array $args)
     {
         try {
+<<<<<<< Updated upstream
 
             $cde = \lbs\command\model\Commande::select(['id', 'nom', 'created_at', 'livraison', 'status'])->get();
             $cde_count = \lbs\command\model\Commande::all()->count();
@@ -39,13 +40,22 @@ class CommandesController
                 ];
             }
 
+=======
+            $cde = commande::all()->take(3);
+            $commande_count = $cde->count();
+            $commandes =[];
+>>>>>>> Stashed changes
             $rs = $resp->withStatus(200)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
-
             $rs->getBody()->write(json_encode([
                 "type" => "collection",
+<<<<<<< Updated upstream
                 "count" => $cde_count,
                 "commands" => $cde->toArray()]));
+=======
+                "count" => $commande_count,
+                "commandes" => $cde]));
+>>>>>>> Stashed changes
             return $rs;
         } catch (\Exception $e) {
             return Writer::json_error($rs, 404, $e->getMessage());
