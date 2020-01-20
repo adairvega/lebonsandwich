@@ -4,6 +4,7 @@ namespace lbs\command\control;
 
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use MongoDB\Driver\WriteError;
+use phpDocumentor\Reflection\Types\Integer;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use \lbs\command\model\Commande as commande;
@@ -25,11 +26,31 @@ class CommandesController
             if (sizeof($parts) > 1) {
                 parse_str($parts['query'], $query);
                 $uri_key = (array_keys($query));
-                $cde = commande::where($uri_key[0], "=", $query[$uri_key[0]])->get();
+                if (sizeof($uri_key) <= 1) {
+                    if ($uri_key[0] == 'page') {
+                        $page_skip = (int)$query[$uri_key[0]] * 10 - 10;
+                        $cde = commande::all();
+                        $count = count($cde);
+                        $cde = commande::all()->skip($page_skip)->take(10);
+                    } else {
+                        $cde = commande::where($uri_key[0], '=', $query[$uri_key[0]])->get();
+                        $count = count($cde);
+                        $cde = commande::where($uri_key[0], '=', $query[$uri_key[0]])->take(10)->get();
+                    }
+                } else {
+                    $page = array_search("page", $uri_key);
+                    $data = $uri_key[!"page"];
+                    $data_position = array_search($data, $uri_key);
+                    $page_skip = (int)$query[$uri_key[$page]] * 10 - 10;
+                    $cde = commande::where($data, '=', $query[$uri_key[$data_position]])->get();
+                    $count = count($cde);
+                    $cde = commande::where($data, '=', $query[$uri_key[$data_position]])->skip($page_skip)->take(10)->get();
+                }
             } else {
                 $cde = commande::all();
+                $count = count($cde);
+                $cde = commande::all()->take(10);
             }
-            $commande_count = $cde->count();
             $orders["commandes"] = array();
             foreach ($cde as $commande) {
                 $order = array();
@@ -45,7 +66,8 @@ class CommandesController
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
             $rs->getBody()->write(json_encode([
                 "type" => "collection",
-                "count" => $commande_count,
+                "count" => $count,
+                "size" => 10,
                 "commandes" => $orders["commandes"]]));
             return $rs;
         } catch (\Exception $e) {
