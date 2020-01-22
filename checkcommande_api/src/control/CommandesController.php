@@ -4,6 +4,7 @@ namespace lbs\command\control;
 
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use MongoDB\Driver\WriteError;
+use phpDocumentor\Reflection\Types\Integer;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use \lbs\command\model\Commande as commande;
@@ -20,42 +21,54 @@ class CommandesController
     public function getCommands(Request $req, Response $resp, array $args)
     {
         try {
-<<<<<<< Updated upstream
-
-            $cde = \lbs\command\model\Commande::select(['id', 'nom', 'created_at', 'livraison', 'status'])->get();
-            $cde_count = \lbs\command\model\Commande::all()->count();
-
-            $rows = $cde->orderBy('livraison')->get();
-            $commands = [];
-
-            foreach ($rows as $row) {
-                $commands[] = [
-                    'command' => $row->toArray(),
-                    'links' => [
-                        'self' => [
-                            'href' => $this->c->get('router')
-                                ->pathFor('command', ['id' => $row->id])
-                        ]
-                    ]
-                ];
+            $url = $_SERVER['REQUEST_URI'];
+            $parts = parse_url($url);
+            if (sizeof($parts) > 1) {
+                parse_str($parts['query'], $query);
+                $uri_key = (array_keys($query));
+                if (sizeof($uri_key) <= 1) {
+                    if ($uri_key[0] == 'page') {
+                        $page_skip = (int)$query[$uri_key[0]] * 10 - 10;
+                        $cde = commande::all();
+                        $count = count($cde);
+                        $cde = commande::all()->skip($page_skip)->take(10);
+                    } else {
+                        $cde = commande::where($uri_key[0], '=', $query[$uri_key[0]])->get();
+                        $count = count($cde);
+                        $cde = commande::where($uri_key[0], '=', $query[$uri_key[0]])->take(10)->get();
+                    }
+                } else {
+                    $page = array_search("page", $uri_key);
+                    $data = $uri_key[!"page"];
+                    $data_position = array_search($data, $uri_key);
+                    $page_skip = (int)$query[$uri_key[$page]] * 10 - 10;
+                    $cde = commande::where($data, '=', $query[$uri_key[$data_position]])->get();
+                    $count = count($cde);
+                    $cde = commande::where($data, '=', $query[$uri_key[$data_position]])->skip($page_skip)->take(10)->get();
+                }
+            } else {
+                $cde = commande::all();
+                $count = count($cde);
+                $cde = commande::all()->take(10);
             }
-
-=======
-            $cde = commande::all()->take(3);
-            $commande_count = $cde->count();
-            $commandes =[];
->>>>>>> Stashed changes
+            $orders["commandes"] = array();
+            foreach ($cde as $commande) {
+                $order = array();
+                $order["commande"]["id"] = $commande->id;
+                $order["commande"]["nom"] = $commande->nom;
+                $order["commande"]["created_at"] = $commande->created_at;
+                $order["commande"]["livraison"] = $commande->livraison;
+                $order["commande"]["status"] = $commande->status;
+                $order["links"]["self"] = array("href" => "http://api.checkcommande.local:19280/commandes/" . $commande->id);
+                $orders["commandes"][] = $order;
+            }
             $rs = $resp->withStatus(200)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
             $rs->getBody()->write(json_encode([
                 "type" => "collection",
-<<<<<<< Updated upstream
-                "count" => $cde_count,
-                "commands" => $cde->toArray()]));
-=======
-                "count" => $commande_count,
-                "commandes" => $cde]));
->>>>>>> Stashed changes
+                "count" => $count,
+                "size" => 10,
+                "commandes" => $orders["commandes"]]));
             return $rs;
         } catch (\Exception $e) {
             return Writer::json_error($rs, 404, $e->getMessage());
