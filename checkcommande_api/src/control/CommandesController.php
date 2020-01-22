@@ -7,7 +7,6 @@ use MongoDB\Driver\WriteError;
 use phpDocumentor\Reflection\Types\Integer;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use \lbs\command\model\Commande as commande;
 
 class CommandesController
 {
@@ -21,6 +20,7 @@ class CommandesController
     public function getCommands(Request $req, Response $resp, array $args)
     {
         try {
+<<<<<<< HEAD
             $url = $_SERVER['REQUEST_URI'];
             $parts = parse_url($url);
             if (sizeof($parts) > 1) {
@@ -62,16 +62,39 @@ class CommandesController
                 $order["links"]["self"] = array("href" => "http://api.checkcommande.local:19280/commandes/" . $commande->id);
                 $orders["commandes"][] = $order;
             }
+=======
+
+            $cde = \lbs\command\model\Commande::select(['id', 'nom', 'created_at','livraison', 'status'])->get();
+            $cde_count = \lbs\command\model\Commande::all()->count();
+
+            $rows = $cde->orderBy('livraison')->get();
+            $commands = [];
+
+            foreach($rows as $row){
+                $commands[] = [
+                    'command' => $row->toArray(),
+                    'links' => [
+                        'self' => [
+                            'href' => $this->c->get('router')
+                                                ->pathFor('command', ['id'=>$row->id])]]]
+            }
+
+>>>>>>> 94485259d4ee1f3519b7e1ab59392fdffd78b2f1
             $rs = $resp->withStatus(200)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
             $rs->getBody()->write(json_encode([
                 "type" => "collection",
+<<<<<<< HEAD
                 "count" => $count,
                 "size" => 10,
                 "commandes" => $orders["commandes"]]));
+=======
+                "count" => $cde_count,
+                "commands"=> $cde->toArray()]));
+
+>>>>>>> 94485259d4ee1f3519b7e1ab59392fdffd78b2f1
             return $rs;
         } catch (\Exception $e) {
-            echo "HOla";
             return Writer::json_error($rs, 404, $e->getMessage());
         }
     }

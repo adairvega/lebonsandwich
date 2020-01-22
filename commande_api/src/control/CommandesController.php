@@ -17,55 +17,40 @@ class CommandesController
         $this->c = $c;
     }
 
-    public function getCommands(Request $req, Response $resp, array $args)
+        public function getCommands(Request $req, Response $resp, array $args)
     {
-
         try {
-
             $cde = \lbs\command\model\Commande::all();
-
             $rs = $resp->withStatus(200)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
-
             $rs->getBody()->write(json_encode([
                 "type" => "collection",
                 "count" => $cde,
                 "commandes" => $cde]));
-
             return $rs;
         } catch (\Exception $e) {
             echo "HOla";
             return Writer::json_error($rs, 404, $e->getMessage());
         }
-
     }
-
     public function getCommand(Request $req, Response $resp, array $args)
     {
         try {
             $id = $args['id'];
-
             $cde = \lbs\command\model\Commande::findOrFail($id);
-
             $rs = $resp->withStatus(200)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
-
             $rs->getBody()->write(json_encode([
                 "type" => "collection",
                 "commandes" => $cde]));
-
             return $rs;
-
         } catch (ModelNotFoundException $e) {
-
             $rs = $resp->withStatus(404)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
             $rs->getBody()->write(json_encode(['Error_code' => 404, 'Error message' => $e->getMessage()]));
-
             return $rs;
         }
     }
-
     public function insertCommand(Request $req, Response $resp, array $args)
     {
         try {
@@ -91,8 +76,6 @@ class CommandesController
             return $rs;
         }
     }
-
-
     public function updateCommand(Request $req, Response $resp, array $args)
     {
         if ($commande_test = commande::find($args["id"])) {
@@ -121,4 +104,3 @@ class CommandesController
             return $rs;
         }
     }
-}
