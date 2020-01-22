@@ -32,26 +32,56 @@ class CommandesController
                         $cde = commande::all();
                         $count = count($cde);
                         $cde = commande::all()->skip($page_skip)->take(10);
-                    } else {
+                    } else {  
                         $cde = commande::where($uri_key[0], '=', $query[$uri_key[0]])->get();
                         $count = count($cde);
                         $cde = commande::where($uri_key[0], '=', $query[$uri_key[0]])->take(10)->get();
                     }
-                } else {
+                } elseif($uri_key[0] == 'page' && $uri_key[1] == 'size') {                                
+                    $page_skip = (int)$query[$uri_key[0]] * 10 - 10;
+                    $size = (int)$query[$uri_key[1]];
+                    $cde = commande::skip($page_skip)->take($size)->get();
+                    $count = count($cde);
+                    $total_commandes = commande::all()->count();
+                    $total_pages = $total_commandes / $size;
+                    if($page_skip > $total_pages){
+                        $cde = commande::latest()->take($size)->get();
+                    }else {
+                        $cde = commande::skip($page_skip)->take($size)->get();
+                    }
+                    $page = (int)$query[$uri_key[0]];
+                    $links = array(
+                        "next" => array(
+                            "href" => "http://api.checkcommande.local:19280/commandes/?page=".($page + 1)."&size=".$size,
+                        ),
+                        "prev" => array(
+                            "href" => "http://api.checkcommande.local:19280/commandes/?page=".($page - 1)."&size=".$size,
+                        ),
+                        "last" => array(
+                            "href" => "http://api.checkcommande.local:19280/commandes/?page=".round($total_pages)."&size=".$size,
+                        ),
+                        "first" => array(
+                            "href" => "http://api.checkcommande.local:19280/commandes/?page=1&size=".$size,
+                        )
+                    );
+                }
+                else {
                     $page = array_search("page", $uri_key);
-                    $data = $uri_key[!"page"];
-                    $data_position = array_search($data, $uri_key);
-                    $page_skip = (int)$query[$uri_key[$page]] * 10 - 10;
+                    $data = $uri_key[!"page"];   
+                    $data_position = array_search($data, $uri_key);                    
+                    $page_skip = (int)$query[$uri_key[$page]] * 10 - 10;                                        
                     $cde = commande::where($data, '=', $query[$uri_key[$data_position]])->get();
                     $count = count($cde);
-                    $cde = commande::where($data, '=', $query[$uri_key[$data_position]])->skip($page_skip)->take(10)->get();
+                    $cde = commande::where($data, '=', $query[$uri_key[$data_position]])->skip($page_skip)->take(10)->get();                    
                 }
             } else {
                 $cde = commande::all();
                 $count = count($cde);
                 $cde = commande::all()->take(10);
             }
+
             $orders["commandes"] = array();
+            
             foreach ($cde as $commande) {
                 $order = array();
                 $order["commande"]["id"] = $commande->id;
@@ -86,7 +116,8 @@ class CommandesController
                 "type" => "collection",
 <<<<<<< HEAD
                 "count" => $count,
-                "size" => 10,
+                "size" => $size,
+                "links" => $links,
                 "commandes" => $orders["commandes"]]));
 =======
                 "count" => $cde_count,
