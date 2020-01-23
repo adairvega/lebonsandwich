@@ -2,11 +2,13 @@
 
 namespace lbs\command\control;
 
+use Doctrine\Instantiator\Exception\ExceptionInterface;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use MongoDB\Driver\WriteError;
 use phpDocumentor\Reflection\Types\Integer;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use \lbs\command\model\Commande as commande;
 
 class CommandesController
 {
@@ -20,7 +22,8 @@ class CommandesController
     public function getCommands(Request $req, Response $resp, array $args)
     {
         try {
-<<<<<<< HEAD
+            $size = 0;
+            $links = 0;
             $url = $_SERVER['REQUEST_URI'];
             $parts = parse_url($url);
             if (sizeof($parts) > 1) {
@@ -29,59 +32,62 @@ class CommandesController
                 if (sizeof($uri_key) <= 1) {
                     if ($uri_key[0] == 'page') {
                         $page_skip = (int)$query[$uri_key[0]] * 10 - 10;
-                        $cde = commande::all();
-                        $count = count($cde);
-                        $cde = commande::all()->skip($page_skip)->take(10);
-                    } else {  
-                        $cde = commande::where($uri_key[0], '=', $query[$uri_key[0]])->get();
-                        $count = count($cde);
+                        $count = commande::all()->count();
+                        $size = 10;
+                        $cde = commande::all()->skip($page_skip)->take((int)$size);
+                    } else {
+                        $count = commande::where($uri_key[0], '=', $query[$uri_key[0]])->count();
+                        if ($count < 10) {
+                            $size = $count;
+                        } else {
+                            $size = 10;
+                        }
                         $cde = commande::where($uri_key[0], '=', $query[$uri_key[0]])->take(10)->get();
                     }
-                } elseif($uri_key[0] == 'page' && $uri_key[1] == 'size') {                                
+                } elseif ($uri_key[0] == 'page' && $uri_key[1] == 'size') {
                     $page_skip = (int)$query[$uri_key[0]] * 10 - 10;
                     $size = (int)$query[$uri_key[1]];
-                    $cde = commande::skip($page_skip)->take($size)->get();
-                    $count = count($cde);
-                    $total_commandes = commande::all()->count();
+                    $count = $total_commandes = commande::all()->count();
                     $total_pages = $total_commandes / $size;
-                    if($page_skip > $total_pages){
+                    if ($page_skip > $total_pages) {
                         $cde = commande::latest()->take($size)->get();
-                    }else {
+                    } else {
                         $cde = commande::skip($page_skip)->take($size)->get();
                     }
                     $page = (int)$query[$uri_key[0]];
                     $links = array(
                         "next" => array(
-                            "href" => "http://api.checkcommande.local:19280/commandes/?page=".($page + 1)."&size=".$size,
+                            "href" => "http://api.checkcommande.local:19280/commandes/?page=" . ($page + 1) . "&size=" . $size,
                         ),
                         "prev" => array(
-                            "href" => "http://api.checkcommande.local:19280/commandes/?page=".($page - 1)."&size=".$size,
+                            "href" => "http://api.checkcommande.local:19280/commandes/?page=" . ($page - 1) . "&size=" . $size,
                         ),
                         "last" => array(
-                            "href" => "http://api.checkcommande.local:19280/commandes/?page=".round($total_pages)."&size=".$size,
+                            "href" => "http://api.checkcommande.local:19280/commandes/?page=" . round($total_pages) . "&size=" . $size,
                         ),
                         "first" => array(
-                            "href" => "http://api.checkcommande.local:19280/commandes/?page=1&size=".$size,
+                            "href" => "http://api.checkcommande.local:19280/commandes/?page=1&size=" . $size,
                         )
                     );
-                }
-                else {
+                } else {
                     $page = array_search("page", $uri_key);
-                    $data = $uri_key[!"page"];   
-                    $data_position = array_search($data, $uri_key);                    
-                    $page_skip = (int)$query[$uri_key[$page]] * 10 - 10;                                        
-                    $cde = commande::where($data, '=', $query[$uri_key[$data_position]])->get();
-                    $count = count($cde);
-                    $cde = commande::where($data, '=', $query[$uri_key[$data_position]])->skip($page_skip)->take(10)->get();                    
+                    $data = $uri_key[!"page"];
+                    $data_position = array_search($data, $uri_key);
+                    $page_skip = (int)$query[$uri_key[$page]] * 10 - 10;
+                    $count = commande::where($data, '=', $query[$uri_key[$data_position]])->count();
+                    if ($count < 10) {
+                        $size = $count;
+                    } else {
+                        $size = 10;
+                    }
+                    $cde = commande::where($data, '=', $query[$uri_key[$data_position]])->skip($page_skip)->take(10)->get();
                 }
             } else {
-                $cde = commande::all();
-                $count = count($cde);
+                $count = commande::all()->count();
+                $size = 10;
                 $cde = commande::all()->take(10);
             }
-
             $orders["commandes"] = array();
-            
             foreach ($cde as $commande) {
                 $order = array();
                 $order["commande"]["id"] = $commande->id;
@@ -92,40 +98,16 @@ class CommandesController
                 $order["links"]["self"] = array("href" => "http://api.checkcommande.local:19280/commandes/" . $commande->id);
                 $orders["commandes"][] = $order;
             }
-=======
-
-            $cde = \lbs\command\model\Commande::select(['id', 'nom', 'created_at','livraison', 'status'])->get();
-            $cde_count = \lbs\command\model\Commande::all()->count();
-
-            $rows = $cde->orderBy('livraison')->get();
-            $commands = [];
-
-            foreach($rows as $row){
-                $commands[] = [
-                    'command' => $row->toArray(),
-                    'links' => [
-                        'self' => [
-                            'href' => $this->c->get('router')
-                                                ->pathFor('command', ['id'=>$row->id])]]]
-            }
-
->>>>>>> 94485259d4ee1f3519b7e1ab59392fdffd78b2f1
             $rs = $resp->withStatus(200)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
             $rs->getBody()->write(json_encode([
                 "type" => "collection",
-<<<<<<< HEAD
                 "count" => $count,
                 "size" => $size,
                 "links" => $links,
                 "commandes" => $orders["commandes"]]));
-=======
-                "count" => $cde_count,
-                "commands"=> $cde->toArray()]));
-
->>>>>>> 94485259d4ee1f3519b7e1ab59392fdffd78b2f1
             return $rs;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return Writer::json_error($rs, 404, $e->getMessage());
         }
     }
@@ -143,18 +125,15 @@ class CommandesController
             $rs->getBody()->write(json_encode([
                 "type" => "collection",
                 "commandes" => $cde]));
-
             return $rs;
-
         } catch (ModelNotFoundException $e) {
-
             $rs = $resp->withStatus(404)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
             $rs->getBody()->write(json_encode(['Error_code' => 404, 'Error message' => $e->getMessage()]));
-
             return $rs;
         }
     }
+
 
     public function insertCommand(Request $req, Response $resp, array $args)
     {
@@ -175,9 +154,9 @@ class CommandesController
                 echo "please insert a valid email address";
             }
         } catch (ModelNotFoundException $e) {
-            $rs = $resp->withStatus(404)
+            $rs = $resp->withStatus(500)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
-            $rs->getBody()->write(json_encode(['Error_code' => 404, 'Error message' => $e->getMessage()]));
+            $rs->getBody()->write(json_encode(['Error_code' => 500, 'Error message' => $e->getMessage()]));
             return $rs;
         }
     }
