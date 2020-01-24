@@ -19,8 +19,7 @@ class CategoriesController
         $this->c = $c;
     }
 
-
-    public function getCategorie(Request $req, Response $resp, array $args)
+    public function getCategorieSandwich(Request $req, Response $resp, array $args)
     {
         $c = new \MongoDB\Client("mongodb://dbcat");
         $id = (int)$args["id"];
@@ -40,7 +39,7 @@ class CategoriesController
             $order["sandwich"]["nom"] = $sandwich->nom;
             $order["sandwich"]["description"] = $sandwich->description;
             $order["sandwich"]["type_pain"] = $sandwich->type_pain;
-            //$order["sandwich"]["categories"] = $sandwich->categories;  ??? do we need to add this value to the sandwichs
+            //$order["sandwich"]["categories"] = $sandwich->categories;  ??? do we need to print this value in the sandwichs collection
             $orders["sandwich"][] = $order;
         }
         $rs = $resp->withStatus(200)
@@ -51,6 +50,36 @@ class CategoriesController
             "size" => $count,
             "categorie" => $dede,
             "sandwichs" => $orders["sandwich"]]));
+        return $rs;
+    }
+
+
+    public function getCategorie(Request $req, Response $resp, array $args)
+    {
+        $c = new \MongoDB\Client("mongodb://dbcat");
+        $id = (int)$args["id"];
+        $categories = $c->mongo->categories->find(["id" => $id]);
+        foreach ($categories as $category) {
+            $order = array();
+            $order["id"] = $category->id;
+            $order["nom"] = $category->nom;
+            $order["description"] = $category->description;
+        }
+        $links = array(
+            "sandwich" => array(
+                "href" => "http://api.catalogue.local:19180/categories/" . $id . "/sandwich",
+            ),
+            "self" => array(
+                "href" => "http://api.catalogue.local:19180/categories/" . $id . "/",
+            )
+        );
+        $rs = $resp->withStatus(200)
+            ->withHeader('Content-Type', 'application/json;charset=utf-8');
+        $rs->getBody()->write(json_encode([
+            "type" => "resource",
+            "date" => date("Y-m-d"),
+            "categorie" => $order,
+            "links" => $links]));
         return $rs;
     }
 }
