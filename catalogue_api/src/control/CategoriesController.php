@@ -66,8 +66,8 @@ class CategoriesController
             $order["description"] = $category->description;
         }
         $links = array(
-            "sandwich" => array(
-                "href" => "http://api.catalogue.local:19180/categories/" . $id . "/sandwich",
+            "sandwichs" => array(
+                "href" => "http://api.catalogue.local:19180/categories/" . $id . "/sandwich/",
             ),
             "self" => array(
                 "href" => "http://api.catalogue.local:19180/categories/" . $id . "/",
