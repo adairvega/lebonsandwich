@@ -6,11 +6,8 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use \lbs\common\bootstrap\Eloquent;
 
-$config = parse_ini_file("../src/conf/conf.ini");
-$db = new Illuminate\Database\Capsule\Manager();
-$db->addConnection($config);
-$db->setAsGlobal();
-$db->bootEloquent();
+$connection = new MongoDB\Client("mongodb://dbcat:27017");
+$db = $connection->catalogue;
 
 $errors = require './conf/errors.php';
 $configuration = new \Slim\Container(['settings' => ['displayErrorDetails' => true]]);

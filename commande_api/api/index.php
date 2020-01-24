@@ -11,7 +11,7 @@ $db->addConnection($config);
 $db->setAsGlobal();
 $db->bootEloquent();
 
-$errors = require 'conf/errors.php';
+$errors = require './conf/errors.php';
 
 $configuration = new \Slim\Container(['settings' => ['displayErrorDetails' => true]]);
 

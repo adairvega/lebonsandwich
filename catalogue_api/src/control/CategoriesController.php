@@ -19,11 +19,35 @@ class CategoriesController
 
     public function getCategories(Request $req, Response $resp, array $args)
     {
-        $connection = new MongoDB\Client("mongodb://dbcat:27017");
-        $db = $connection->catalogue;
-        $cat = $db->categories;
-        $col = $cat->find([]);
-        foreach ($col as $categories) {
-        echo $categories["nom"] . "\n";
+        try{
+
+            $connection = new MongoDB\Client("mongodb://dbcat:27017");
+            $db = $connection->catalogue;
+
+            $cat = $db->categories;
+            $sand = $db->sandwichs;
+
+            $col = $cat->find([]);
+            $colsand = $sand->find([]);
+
+            $categories["categories"] = array();
+            foreach ($col as $categ) {
+                $categorie = array();
+                $categorie["categories"]["id"] = $categ->id;
+                $categorie["categories"]["nom"] = $categ->nom;
+                $categorie["categories"]["description"] = $categ->description;
+                $categories["categories"][] = $categorie;
+            }
+
+            $rs = $resp->withStatus(200)
+                        ->withHeader('Content-Type', 'application/json;charset=utf-8');
+            $rs->getBody()->write(json_encode((
+                "type": "ressource",
+                "date": "29-10-2018",
+                "categorie": $categories["categories"])));
+
+        }catch(\Exception $e){
+            return Writer::json_error($rs, 404, $e->getMessage());
         }
+    }
 }
