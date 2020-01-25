@@ -19,19 +19,37 @@ services:
   api.commande:
     image: canals/php:latest
     environment:
-    - VHOST_HOSTNAME=api.commande.local
-    - VHOST_DOCROOT=/var/www/api
+      - VHOST_HOSTNAME=api.commande.local
+      - VHOST_DOCROOT=/var/www/api
     ports:
-    - "19080:80"
-    - "19043:443"
+      - "19080:80"
+      - "19043:443"
     volumes:
-    - ./commande_api/api:/var/www/api
-    - ./commande_api/src:/var/www/src
+      - ./commande_api/api:/var/www/api
+      - ./commande_api/src:/var/www/src
     working_dir: /var/www/src
     networks:
-    - lbs.net
+      - lbs.net
     links:
-    - mysql.commande:dbcom
+      - mysql.commande:dbcom
+
+  api.pointvente:
+    image: canals/php:latest
+    environment:
+      - VHOST_HOSTNAME=api.pointvente.local
+      - VHOST_DOCROOT=/var/www/api
+    ports:
+      - "19380:80"
+      - "19343:443"
+    volumes:
+      - ./point_vente_api/api:/var/www/api
+      - ./point_vente_api/src:/var/www/src
+      - ./point_vente_api/sql:/var/www/sql
+    working_dir: /var/www/src
+    networks:
+      - lbs.net
+    links:
+      - mysql.commande:dbcom
 
   api.catalogue:
     image: canals/php:latest
@@ -41,19 +59,36 @@ services:
     ports:
       - "19180:80"
       - "19143:443"
-    volumes :
+    volumes:
       - ./catalogue_api/api:/var/www/api
       - ./catalogue_api/src:/var/www/src
-    working_dir : /var/www/src
+    working_dir: /var/www/src
     networks:
       - lbs.net
-    links :
+    links:
       - mongo.cat:dbcat
 
+  api.checkcommande:
+    image: canals/php:latest
+    environment:
+      - VHOST_HOSTNAME=api.checkcommande.local
+      - VHOST_DOCROOT=/var/www/api
+    ports:
+      - "19280:80"
+      - "19243:443"
+    volumes:
+      - ./checkcommande_api/api:/var/www/api
+      - ./checkcommande_api/src:/var/www/src
+      - ./checkcommande_api/sql:/var/www/sql
+    working_dir: /var/www/src
+    networks:
+      - lbs.net
+    links:
+      - mysql.commande:dbcom
 
-#############################
-# mysql commande  + adminer
-#############################
+  #############################
+  # mysql commande  + adminer
+  #############################
   mysql.commande:
     image: mariadb:latest
     command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8 --collation-server=utf8_general_ci
@@ -66,23 +101,23 @@ services:
       - "3307:3306"
     networks:
       - lbs.net
-    volumes :
+    volumes:
       - ./commande_api/sql:/var/sql
 
   adminer:
-     image: adminer
-     ports:
-       - "8080:8080"
-     networks:
-       - lbs.net
-     links:
-       - mysql.commande:command
+    image: adminer
+    ports:
+      - "8080:8080"
+    networks:
+      - lbs.net
+    links:
+      - mysql.commande:command
 
 
 
-################################################
-# mongodb & mongo-express
-###############################################
+  ################################################
+  # mongodb & mongo-express
+  ###############################################
   mongo.cat:
     image: mongo:latest
     volumes:
@@ -96,9 +131,9 @@ services:
   mongo-express:
     image: mongo-express:latest
     networks:
-    - lbs.net
+      - lbs.net
     ports:
-    - "8081:8081"
+      - "8081:8081"
     links:
-    - mongo.cat:mongo
+      - mongo.cat:mongo
     
