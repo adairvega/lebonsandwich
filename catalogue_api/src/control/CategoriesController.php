@@ -21,9 +21,10 @@ class CategoriesController
 
     public function getCategorieSandwich(Request $req, Response $resp, array $args)
     {
+        try{
         $c = new \MongoDB\Client("mongodb://dbcat");
         $id = (int)$args["id"];
-        $categories = $c->mongo->categories->find(["id" => $id]);
+        $categories = $c->catalogue->categories->find(["id" => $id]);
         foreach ($categories as $category) {
             $order = array();
             $order["categorie"]["id"] = $category->id;
@@ -31,8 +32,8 @@ class CategoriesController
             $order["categorie"]["description"] = $category->description;
             $orders["commandes"][] = $order;
         }
-        $sandwichs = $c->mongo->sandwichs->find(["categories" => $order["categorie"]["nom"]]);
-        $count = $c->mongo->sandwichs->count(["categories" => $order["categorie"]["nom"]]);
+        $sandwichs = $c->catalogue->sandwichs->find(["categories" => $order["categorie"]["nom"]]);
+        $count = $c->catalogue->sandwichs->count(["categories" => $order["categorie"]["nom"]]);
         foreach ($sandwichs as $sandwich) {
             $order = array();
             $order["sandwich"]["ref"] = $sandwich->ref;
@@ -51,6 +52,9 @@ class CategoriesController
             "categorie" => $dede,
             "sandwichs" => $orders["sandwich"]]));
         return $rs;
+        } catch (Exception $e) {
+            return Writer::json_error($rs, 404, $e->getMessage());
+        }
     }
 
 
@@ -58,7 +62,7 @@ class CategoriesController
     {
         $c = new \MongoDB\Client("mongodb://dbcat");
         $id = (int)$args["id"];
-        $categories = $c->mongo->categories->find(["id" => $id]);
+        $categories = $c->catalogue->categories->find(["id" => $id]);
         foreach ($categories as $category) {
             $order = array();
             $order["id"] = $category->id;
