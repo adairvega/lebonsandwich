@@ -22,8 +22,6 @@ $app->get('/commandes[/]', \lbs\command\control\CommandesController::class . ':g
 
 $app->get('/commandes/{id}[/]', \lbs\command\control\CommandesController::class . ':getCommand')->setName('commande_api');
 
-$app->post('/commandes/{nom}/{mail}', \lbs\command\control\CommandesController::class . ':insertCommand');
-
 $app->put('/commandes/{id}/{data}/{value}', \lbs\command\control\CommandesController::class . ':updateCommand');
 
 $app->run();

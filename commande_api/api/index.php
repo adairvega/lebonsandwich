@@ -19,8 +19,8 @@ $app_config = array_merge($errors);
 
 $app = new \Slim\App(new \Slim\Container($app_config,$configuration));
 
-$app->get('/commandes[/]', \lbs\command\control\CategoriesController::class . ':getCommands');
-$app->get('/commandes/{id}[/]', \lbs\command\control\CategoriesController::class . ':getCommand')->setName('commande_api');
-$app->post('/commandes/{nom}/{mail}', \lbs\command\control\CategoriesController::class . ':insertCommand');
-$app->put('/commandes/{id}/{data}/{value}', \lbs\command\control\CategoriesController::class . ':updateCommand');
+$app->get('/commandes[/]', \lbs\command\control\CommandesController::class . ':getCommands');
+$app->get('/commandes/{id}[/]', \lbs\command\control\CommandesController::class . ':getCommand')->setName('commande_api');
+$app->post('/commandes/{nom}/{mail}', \lbs\command\control\CommandesController::class . ':insertCommand');
+$app->put('/commandes/{id}/{data}/{value}', \lbs\command\control\CommandesController::class . ':updateCommand');
 $app->run();

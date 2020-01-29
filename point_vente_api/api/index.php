@@ -17,5 +17,8 @@ $configuration = new \Slim\Container(['settings' => ['displayErrorDetails' => tr
 $app_config = array_merge($errors);
 $app = new \Slim\App(new \Slim\Container($app_config));
 
-$app->get('/commands/{id}[/]', \lbs\command\control\CommandesController::class . ':getCommand')->setName('commande_api');
+$app->get('/commands/{id}[/]', \lbs\command\control\CommandesController::class . ':getCommand')->setName('commande_api')
+	->add(\lbs\command\api\middlewares\Token::class.':check')
+	->setName('commande');
+
 $app->run();
