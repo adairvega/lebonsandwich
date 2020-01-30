@@ -33,24 +33,6 @@ services:
     links:
       - mysql.commande:dbcom
 
-  api.pointvente:
-    image: canals/php:latest
-    environment:
-      - VHOST_HOSTNAME=api.pointvente.local
-      - VHOST_DOCROOT=/var/www/api
-    ports:
-      - "19380:80"
-      - "19343:443"
-    volumes:
-      - ./point_vente_api/api:/var/www/api
-      - ./point_vente_api/src:/var/www/src
-      - ./point_vente_api/sql:/var/www/sql
-    working_dir: /var/www/src
-    networks:
-      - lbs.net
-    links:
-      - mysql.commande:dbcom
-
   api.catalogue:
     image: canals/php:latest
     environment:

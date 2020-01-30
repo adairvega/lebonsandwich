@@ -11,7 +11,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use \lbs\command\model\Commande as commande;
 
-class CommandesController
+class pointVenteController
 {
     protected $c;
 
@@ -36,7 +36,7 @@ class CommandesController
             $order["items"] = $items;
             $links = array(
                 "self" => "http://api.checkcommande.local:19280/commandes/" . $id,
-                "items" => "http://api.pointvente.local:19380/commands/" . $id . "/"
+                "items" => "http://api.checkcommande.local:19280/commands/" . $id . "/items"
             );
             $rs = $resp->withStatus(200)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
@@ -44,6 +44,29 @@ class CommandesController
                 "type" => "resource",
                 "links" => $links,
                 "command" => $order]));
+            return $rs;
+        } catch (ModelNotFoundException $e) {
+            $rs = $resp->withStatus(404)
+                ->withHeader('Content-Type', 'application/json;charset=utf-8');
+            $rs->getBody()->write(json_encode(['Error_code' => 404, 'Error message' => $e->getMessage()]));
+            return $rs;
+        }
+    }
+
+
+    public function getItems(Request $req, Response $resp, array $args)
+    {
+        try {
+            $id = $args['id'];
+            $cde = Commande::findOrFail($id);
+            $items = $cde->commandeItems()->get();
+
+            $rs = $resp->withStatus(200)->withHeader('Content-Type', 'application/json;charset=utf-8');
+            $rs->getBody()->write(json_encode([
+                "type" => "item",
+                "id" => $id,
+                "items" => $items
+            ]));
             return $rs;
         } catch (ModelNotFoundException $e) {
             $rs = $resp->withStatus(404)
