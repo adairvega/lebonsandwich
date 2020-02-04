@@ -4,7 +4,12 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use \lbs\common\bootstrap\Eloquent;
 
+<<<<<<< HEAD
 $config = parse_ini_file("./conf/conf.ini");
+=======
+
+$config = parse_ini_file("conf/conf.ini");
+>>>>>>> adair
 $db = new Illuminate\Database\Capsule\Manager();
 $db->addConnection($config);
 $db->setAsGlobal();
