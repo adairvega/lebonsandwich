@@ -21,7 +21,7 @@ $app = new \Slim\App(new \Slim\Container($app_config));
 $app->get('/commandes[/]', \lbs\command\control\CommandesController::class . ':getCommands');
 
 $app->get('/commandes/{id}[/]', \lbs\command\control\CommandesController::class . ':getCommand')->setName('commande_api');
-
 $app->put('/commandes/{id}/{data}/{value}', \lbs\command\control\CommandesController::class . ':updateCommand');
-
+$app->get('/commands/{id}[/]', \lbs\command\control\pointVenteController::class . ':getCommand')->setName('commande_api');
+$app->get('/commands/{id}/items[/]', \lbs\command\control\pointVenteController::class . ':getItems')->setName('commande_api');
 $app->run();

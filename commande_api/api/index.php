@@ -6,6 +6,7 @@ use \lbs\common\bootstrap\Eloquent;
 
 $config = parse_ini_file("../src/conf/conf.ini");
 
+$config = parse_ini_file("../src/conf/conf.ini");
 $db = new Illuminate\Database\Capsule\Manager();
 $db->addConnection($config);
 $db->setAsGlobal();
