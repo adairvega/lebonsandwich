@@ -9,6 +9,7 @@ use phpDocumentor\Reflection\Types\Integer;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use \lbs\command\model\Commande as commande;
+use function GuzzleHttp\Psr7\str;
 
 class CategoriesController
 {
@@ -84,6 +85,27 @@ class CategoriesController
             "date" => date("Y-m-d"),
             "categorie" => $order,
             "links" => $links]));
+        return $rs;
+    }
+
+
+    public function getNameSandwich(Request $req, Response $resp, array $args)
+    {
+        $c = new \MongoDB\Client("mongodb://dbcat");
+        $uri = (string)$args["uri"];
+        $sandwichs = $c->mongo->sandwichs->find(["ref" => $uri]);
+        foreach ($sandwichs as $sandwich) {
+            $order = array();
+            $order["ref"] = $sandwich->ref;
+            $order["nom"] = $sandwich->nom;
+            $order["prix"] = (string)$sandwich->prix;
+        }
+        $rs = $resp->withStatus(200)
+            ->withHeader('Content-Type', 'application/json;charset=utf-8');
+        $rs->getBody()->write(json_encode([
+            "type" => "resource",
+            "sandwich" => $order
+        ]));
         return $rs;
     }
 }
