@@ -3,15 +3,9 @@ require '../src/vendor/autoload.php';
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use \lbs\common\bootstrap\Eloquent;
-<<<<<<< HEAD
-
-$config = parse_ini_file("conf/conf.ini");
-var_dump($config);
-=======
 use GuzzleHttp\Client;
 
-$config = parse_ini_file("../src/conf/conf.ini");
->>>>>>> c3c34b4d701bc0e258fdd584775a3af74150a69a
+$config = parse_ini_file("conf/conf.ini");
 $db = new Illuminate\Database\Capsule\Manager();
 $db->addConnection($config);
 $db->setAsGlobal();
@@ -20,12 +14,7 @@ $db->bootEloquent();
 $errors = require './conf/errors.php';
 
 $configuration = new \Slim\Container(['settings' => ['displayErrorDetails' => true]]);
-
 $app_config = array_merge($errors);
-<<<<<<< HEAD
-
-$app = new \Slim\App(new \Slim\Container($app_config,$configuration));
-=======
 $app = new \Slim\App([
     'settings' => [
         'displayErrorDetails' => true,
@@ -52,7 +41,6 @@ function checkToken(Request $rq, Response $rs, callable $next)
     }
     return $next($rq, $rs);
 }
->>>>>>> c3c34b4d701bc0e258fdd584775a3af74150a69a
 
 $app->get('/commandes[/]', function ($rq, $rs, $args) {
     return (new \lbs\command\control\CommandesController($this))->getCommands($rq, $rs, $args);
