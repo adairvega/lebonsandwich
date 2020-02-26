@@ -20,7 +20,7 @@ class CommandesController
         public function getCommands(Request $req, Response $resp, array $args)
     {
         try {
-            $cde = \lbs\command\model\Commande::all();
+            $cde = commande::all();
             $rs = $resp->withStatus(200)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
             $rs->getBody()->write(json_encode([
