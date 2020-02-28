@@ -92,16 +92,13 @@ class CategoriesController
         $sandwichs = $c->mongo->sandwichs->find(["ref" => $uri]);
         foreach ($sandwichs as $sandwich) {
             $order = array();
-            $order["ref"] = $sandwich->ref;
+            $order["ref"] = "/sandwichs/" . $sandwich->ref;
             $order["nom"] = $sandwich->nom;
             $order["prix"] = (string)$sandwich->prix;
         }
         $rs = $resp->withStatus(200)
             ->withHeader('Content-Type', 'application/json;charset=utf-8');
-        $rs->getBody()->write(json_encode([
-            "type" => "resource",
-            "sandwich" => $order
-        ]));
+        $rs->getBody()->write(json_encode([$order]));
         return $rs;
     }
 }

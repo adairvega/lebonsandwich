@@ -3,10 +3,10 @@
 namespace lbs\command\control;
 
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use lbs\command\Item;
+use lbs\command\model\Item as item;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use \lbs\command\model\Commande as commande;
+use lbs\command\model\Commande as commande;
 use Ramsey\Uuid\Uuid;
 use GuzzleHttp\Client;
 
@@ -42,18 +42,34 @@ class CommandesController
     public function getCommand(Request $req, Response $resp, array $args)
     {
         try {
+            $links = array(
+                "self" => "http://api.checkcommande.local:19280/commandes/?page=",
+
+                "items" => "http://api.checkcommande.local:19280/commandes/?page="
+            );
             $id = $args['id'];
             $cde = Commande::findOrFail($id);
+            $items_commande = $cde->getItems()->get();
             $order = array();
+            $order["id"] = $cde->id;
+            $order["livraison"] = $cde->livraison;
             $order["nom"] = $cde->nom;
             $order["mail"] = $cde->mail;
-            $order["livraison"] = array("date" => $cde->livraison, "heure" => $cde->livraison);
-            $order["id"] = $cde->id;
-            $order["token"] = $cde->token;
+            $order["status"] = $cde->status;
             $order["montant"] = $cde->montant;
+            foreach ($items_commande as $item) {
+                $items = array();
+                $items["uri"] = $item->uri;
+                $items["libelle"] = $item->libelle;
+                $items["tarif"] = $item->tarif;
+                $items["quantite"] = $item->quantite;
+                $order["items"][] = $items;
+            }
             $rs = $resp->withStatus(200)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
             $rs->getBody()->write(json_encode([
+                "type" => "resource",
+                "links" => $links,
                 "commande" => $order]));
             return $rs;
         } catch (ModelNotFoundException $e) {
@@ -67,27 +83,24 @@ class CommandesController
     public function insertCommand(Request $req, Response $resp, array $args)
     {
         try {
-            $client = new Client([
-                "base_uri" => "http://api.catalogue.local"
-            ]);
-            $request = $client->get('/categories/2/sandwichs');
-            echo $response = $request->getBody();
-            die();
-            $dede = json_decode($req->getBody());
-            foreach ($dede->items as $item) {
-                $q = (int)$item->q;
-                $response = $client->request('GET', '/sandwich/' + $item->uri);
-                $sandwich = json_decode($response->getBody());
-                foreach ($sandwich as $value) {
-                    $order[] = array();
-                    $order['uri'] = $value->ref;
-                    $order['nom'] = $value->nom;
-                    $order['prix'] = (float)$value->prix;
-                    $order['quantite'] = $q;
-                }
-            }
-            die("dedede");
             if (filter_var($args['mail'], FILTER_VALIDATE_EMAIL) == !0) {
+                $client = new Client([
+                    "base_uri" => "http://api.catalogue.local"
+                ]);
+                $prix_commande = 0;
+                $getBody = json_decode($req->getBody());
+                foreach ($getBody->items as $item) {
+                    $response = $client->get($item->uri);
+                    $sandwichs = json_decode($response->getBody());
+                    foreach ($sandwichs as $sandwich) {
+                        $order = array();
+                        $order["commande"]["uri"] = $sandwich->ref;
+                        $order["commande"]["libelle"] = $sandwich->nom;
+                        $order["commande"]["tarif"] = $sandwich->prix;
+                        $order["commande"]["quantite"] = $item->q;
+                        $orders["commandes"][] = $order;
+                    }
+                }
                 $commande_test = new commande();
                 $commande_test->id = Uuid::uuid4();
                 $token = random_bytes(32);
@@ -96,11 +109,28 @@ class CommandesController
                 $commande_test->livraison = date("Y-m-d h:i:s");
                 $commande_test->mail = filter_var($args['mail'], FILTER_VALIDATE_EMAIL);
                 $commande_test->token = $token;
+                foreach ($orders["commandes"] as $commande) {
+                    $item = new item();
+                    $item->uri = $commande["commande"]["uri"];
+                    $item->libelle = $commande["commande"]["libelle"];
+                    $item->tarif = $commande["commande"]["tarif"];
+                    $item->quantite = $commande["commande"]["quantite"];
+                    $item->command_id = $commande_test->id;
+                    $item->save();
+                    $prix_commande += $commande["commande"]["tarif"] * $commande["commande"]["quantite"];
+                }
+                $commande_test->montant = $prix_commande;
                 $commande_test->save();
                 $rs = $resp->withStatus(201)
                     ->withHeader('Location', 'http://api.commande.local:19080/commandes/' . $commande_test->id)
                     ->withHeader('Content-Type', 'application/json;charset=utf-8');
-                $rs->getBody()->write(json_encode(commande::find($commande_test->id)));
+                $rs->getBody()->write(json_encode([
+                    "commande" => commande::select("nom", "mail", "livraison")->find($commande_test->id),
+                    "id" => $commande_test->id,
+                    "token" => $token,
+                    "montant" => $prix_commande,
+                    "items" => $getBody->items
+                ]));
                 return $rs;
             } else {
                 echo "please insert a valid email address";
