@@ -43,6 +43,22 @@ function checkToken(Request $rq, Response $rs, callable $next)
     return $next($rq, $rs);
 }
 
+
+function checkJWT(Request $rq, Response $rs, callable $next)
+{
+    if (!empty($rq->getHeader('Authorization')[0])) {
+        $dede = $rq->getHeader("Authorization")[0];
+        $getHeader_value = substr($dede, 7);
+        echo $getHeader_value;
+    } else {
+        $rs = $rs->withStatus(401)
+            ->withHeader('Content-Type', 'application/json;charset=utf-8');
+        $rs->getBody()->write(json_encode(['type' => 'error', 'Error_code' => 401, 'message :' => 'no authorization header present']));
+        return $rs;
+    }
+    die();
+}
+
 $app->get('/commandes[/]', function ($rq, $rs, $args) {
     return (new \lbs\command\control\CommandesController($this))->getCommands($rq, $rs, $args);
 });
@@ -55,4 +71,10 @@ $app->post('/commandes/{nom}/{mail}', function ($rq, $rs, $args) {
 $app->put('/commandes/{id}/{data}/{value}', function ($rq, $rs, $args) {
     return (new \lbs\command\control\CommandesController($this))->updateCommand($rq, $rs, $args);
 });
+$app->post('/authentication/{nom}/{mail}', function ($rq, $rs, $args) {
+    return (new \lbs\command\control\CommandesController($this))->userAuthentication($rq, $rs, $args);
+});
+$app->get('/profil/', function ($rq, $rs, $args) {
+    return (new \lbs\command\control\CommandesController($this))->userAuthentication($rq, $rs, $args);
+})->add("checkJWT");
 $app->run();

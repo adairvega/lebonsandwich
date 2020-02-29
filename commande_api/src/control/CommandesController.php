@@ -2,8 +2,10 @@
 
 namespace lbs\command\control;
 
+use Firebase\JWT\JWT;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use lbs\command\model\Item as item;
+use lbs\command\model\Client as user;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use lbs\command\model\Commande as commande;
@@ -168,6 +170,47 @@ class CommandesController
             $rs = $resp->withStatus(404)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
             $rs->getBody()->write(json_encode(['Error_code' => 404, 'please enter an existing id']));
+            return $rs;
+        }
+    }
+
+    public function userAuthentication(Request $req, Response $resp, array $args)
+    {
+        // maybe we can do the check of the Authorization Header inside a MiddleWare ?
+        if (!empty($req->getHeader('Authorization')[0])) {
+            $getHeader = $req->getHeader('Authorization')[0];
+            $getHeader_value = substr($getHeader, 6);
+            $getHeader_value_decode = base64_decode($getHeader_value);
+            $dote_position = strpos($getHeader_value_decode, ':');
+            $user_name = substr($getHeader_value_decode, 0, $dote_position);
+            $user_passwd = substr($getHeader_value_decode, $dote_position + 1);
+            $user = new user();
+            $user = user::where('mail_client', '=', $user_name)->where('passwd', '=', $user_passwd)->get();
+            if (!$user->isEmpty()) {
+                $token = JWT::encode(
+                    ['iss' => 'http://api.commande.local:19080',
+                        'aud' => 'http://api.commande.local:19080',
+                        'iat' => time(),
+                        'exp' => time() + 3600,
+                        'uname' => $user_name,
+                        'lvl' => 1],
+                    'HS512');
+                $rs = $resp->withStatus(200)
+                    ->withHeader('Content-Type', 'application/json;charset=utf-8');
+                $rs->getBody()->write(json_encode([
+                    "token" => $token
+                ]));
+                return $rs;
+            } else {
+                $rs = $resp->withStatus(401)
+                    ->withHeader('Content-Type', 'application/json;charset=utf-8');
+                $rs->getBody()->write(json_encode(['type' => 'error', 'Error_code' => 401, 'message :' => 'email or password incorrect']));
+                return $rs;
+            }
+        } else {
+            $rs = $resp->withStatus(401)
+                ->withHeader('Content-Type', 'application/json;charset=utf-8');
+            $rs->getBody()->write(json_encode(['type' => 'error', 'Error_code' => 401, 'message :' => 'no authorization header present']));
             return $rs;
         }
     }
