@@ -2,10 +2,8 @@
 
 namespace lbs\command\control;
 
-use Firebase\JWT\JWT;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use lbs\command\model\Item as item;
-use lbs\command\model\Client as user;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use lbs\command\model\Commande as commande;
@@ -43,15 +41,18 @@ class CommandesController
 
     public function getCommand(Request $req, Response $resp, array $args)
     {
-        try {
+        $id = $args['id'];
+        $token = $req->getAttribute("token");
+        $cdes = Commande::where('id', '=', $id)->where('token', '=', $token)->get();
+        if (!$cdes->isEmpty()) {
+            foreach ($cdes as $cde) {
+                $items_commande = $cde->getItems()->get();
+            }
             $links = array(
-                "self" => "http://api.checkcommande.local:19280/commandes/?page=",
+                "self" => "http://api.commande.local:19080/commandes/" . $id,
 
-                "items" => "http://api.checkcommande.local:19280/commandes/?page="
+                "items" => "http://api.commande.local:19080/commandes/" . $id . "/items"
             );
-            $id = $args['id'];
-            $cde = Commande::findOrFail($id);
-            $items_commande = $cde->getItems()->get();
             $order = array();
             $order["id"] = $cde->id;
             $order["livraison"] = $cde->livraison;
@@ -74,18 +75,56 @@ class CommandesController
                 "links" => $links,
                 "commande" => $order]));
             return $rs;
-        } catch (ModelNotFoundException $e) {
+        } else {
             $rs = $resp->withStatus(404)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
-            $rs->getBody()->write(json_encode(['Error_code' => 404, 'Error message' => $e->getMessage()]));
+            $rs->getBody()->write(json_encode(['Error_code' => 404, 'Error message' => "token no corresponding"]));
+            return $rs;
+        }
+    }
+
+
+    public function getCommandItems(Request $req, Response $resp, array $args)
+    {
+        $id = $args['id'];
+        $token = $req->getAttribute("token");
+        $cdes = Commande::where('id', '=', $id)->where('token', '=', $token)->get();
+        if (!$cdes->isEmpty()) {
+            foreach ($cdes as $cde) {
+                $items_commande = $cde->getItems()->get();
+            }
+            foreach ($items_commande as $item) {
+                $items = array();
+                $items["uri"] = $item->uri;
+                $items["libelle"] = $item->libelle;
+                $items["tarif"] = $item->tarif;
+                $items["quantite"] = $item->quantite;
+                $order["items"][] = $items;
+            }
+            $rs = $resp->withStatus(200)
+                ->withHeader('Content-Type', 'application/json;charset=utf-8');
+            $rs->getBody()->write(json_encode([
+                "type" => "resource",
+                "items" => $order["items"]]));
+            return $rs;
+        } else {
+            $rs = $resp->withStatus(404)
+                ->withHeader('Content-Type', 'application/json;charset=utf-8');
+            $rs->getBody()->write(json_encode(['Error_code' => 404, 'Error message' => "token no corresponding"]));
             return $rs;
         }
     }
 
     public function insertCommand(Request $req, Response $resp, array $args)
     {
-        try {
-            if (filter_var($args['mail'], FILTER_VALIDATE_EMAIL) == !0) {
+        $body = $req->getParsedBody();
+        $client_id = $body["client_id"];
+        $client_mail = $body["mail"];
+        $client_nom = $body["nom"];
+        $token = $req->getAttribute("token");
+        $token_uid = $token->uid;
+        if ($client_id == $token_uid) {
+            try {
                 $client = new Client([
                     "base_uri" => "http://api.catalogue.local"
                 ]);
@@ -104,12 +143,14 @@ class CommandesController
                     }
                 }
                 $commande_test = new commande();
+                $client = new \lbs\command\model\Client();
+                $client = \lbs\command\model\Client::find($client_id);
                 $commande_test->id = Uuid::uuid4();
                 $token = random_bytes(32);
                 $token = bin2hex($token);
-                $commande_test->nom = (filter_var($args['nom'], FILTER_SANITIZE_STRING));
+                $commande_test->nom = (filter_var($client_nom, FILTER_SANITIZE_STRING));
                 $commande_test->livraison = date("Y-m-d h:i:s");
-                $commande_test->mail = filter_var($args['mail'], FILTER_VALIDATE_EMAIL);
+                $commande_test->mail = (filter_var($client_mail, FILTER_SANITIZE_EMAIL));
                 $commande_test->token = $token;
                 foreach ($orders["commandes"] as $commande) {
                     $item = new item();
@@ -122,7 +163,10 @@ class CommandesController
                     $prix_commande += $commande["commande"]["tarif"] * $commande["commande"]["quantite"];
                 }
                 $commande_test->montant = $prix_commande;
+                $client->cumul_achats += $prix_commande;
+                $commande_test->client_id = $client_id;
                 $commande_test->save();
+                $client->save();
                 $rs = $resp->withStatus(201)
                     ->withHeader('Location', 'http://api.commande.local:19080/commandes/' . $commande_test->id)
                     ->withHeader('Content-Type', 'application/json;charset=utf-8');
@@ -134,13 +178,17 @@ class CommandesController
                     "items" => $getBody->items
                 ]));
                 return $rs;
-            } else {
-                echo "please insert a valid email address";
+            } catch
+            (ModelNotFoundException $e) {
+                $rs = $resp->withStatus(404)
+                    ->withHeader('Content-Type', 'application/json;charset=utf-8');
+                $rs->getBody()->write(json_encode(['Error_code' => 404, 'Error message' => $e->getMessage()]));
+                return $rs;
             }
-        } catch (ModelNotFoundException $e) {
+        } else {
             $rs = $resp->withStatus(404)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
-            $rs->getBody()->write(json_encode(['Error_code' => 404, 'Error message' => $e->getMessage()]));
+            $rs->getBody()->write(json_encode(['Error_code' => 404, 'Error message' => "token and user id given not corresponding"]));
             return $rs;
         }
     }
@@ -174,44 +222,4 @@ class CommandesController
         }
     }
 
-    public function userAuthentication(Request $req, Response $resp, array $args)
-    {
-        // maybe we can do the check of the Authorization Header inside a MiddleWare ?
-        if (!empty($req->getHeader('Authorization')[0])) {
-            $getHeader = $req->getHeader('Authorization')[0];
-            $getHeader_value = substr($getHeader, 6);
-            $getHeader_value_decode = base64_decode($getHeader_value);
-            $dote_position = strpos($getHeader_value_decode, ':');
-            $user_name = substr($getHeader_value_decode, 0, $dote_position);
-            $user_passwd = substr($getHeader_value_decode, $dote_position + 1);
-            $user = new user();
-            $user = user::where('mail_client', '=', $user_name)->where('passwd', '=', $user_passwd)->get();
-            if (!$user->isEmpty()) {
-                $token = JWT::encode(
-                    ['iss' => 'http://api.commande.local:19080',
-                        'aud' => 'http://api.commande.local:19080',
-                        'iat' => time(),
-                        'exp' => time() + 3600,
-                        'uname' => $user_name,
-                        'lvl' => 1],
-                    'HS512');
-                $rs = $resp->withStatus(200)
-                    ->withHeader('Content-Type', 'application/json;charset=utf-8');
-                $rs->getBody()->write(json_encode([
-                    "token" => $token
-                ]));
-                return $rs;
-            } else {
-                $rs = $resp->withStatus(401)
-                    ->withHeader('Content-Type', 'application/json;charset=utf-8');
-                $rs->getBody()->write(json_encode(['type' => 'error', 'Error_code' => 401, 'message :' => 'email or password incorrect']));
-                return $rs;
-            }
-        } else {
-            $rs = $resp->withStatus(401)
-                ->withHeader('Content-Type', 'application/json;charset=utf-8');
-            $rs->getBody()->write(json_encode(['type' => 'error', 'Error_code' => 401, 'message :' => 'no authorization header present']));
-            return $rs;
-        }
-    }
 }

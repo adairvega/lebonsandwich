@@ -5,7 +5,7 @@ require '../src/vendor/autoload.php';
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use \lbs\common\bootstrap\Eloquent;
-use GuzzleHttp\Client;
+
 
 $config = parse_ini_file("../src/conf/conf.ini");
 $db = new Illuminate\Database\Capsule\Manager();
@@ -23,58 +23,33 @@ $app = new \Slim\App([
         'whoops.editor' => 'sublime',
     ]]);
 
-$container = $app->getContainer();
-$container['guzzle'] = function ($container) {
-    $myService = new \GuzzleHttp\Client();
-    return $myService;
-};
-
-function checkToken(Request $rq, Response $rs, callable $next)
-{
-    $id = $rq->getAttribute('route')->getArgument('id');
-    $token = $rq->getQueryParams('token', null);
-    try {
-        \lbs\command\model\Commande::where('id', '=', $id)
-            ->where('token', '=', $token)
-            ->firstOrFail();
-    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $exception) {
-        return $rs;
-    }
-    return $next($rq, $rs);
-}
-
-
-function checkJWT(Request $rq, Response $rs, callable $next)
-{
-    if (!empty($rq->getHeader('Authorization')[0])) {
-        $dede = $rq->getHeader("Authorization")[0];
-        $getHeader_value = substr($dede, 7);
-        echo $getHeader_value;
-    } else {
-        $rs = $rs->withStatus(401)
-            ->withHeader('Content-Type', 'application/json;charset=utf-8');
-        $rs->getBody()->write(json_encode(['type' => 'error', 'Error_code' => 401, 'message :' => 'no authorization header present']));
-        return $rs;
-    }
-    die();
-}
 
 $app->get('/commandes[/]', function ($rq, $rs, $args) {
-    return (new \lbs\command\control\CommandesController($this))->getCommands($rq, $rs, $args);
+    return (new lbs\command\control\CommandesController($this))->getCommands($rq, $rs, $args);
 });
+
 $app->get('/commandes/{id}[/]', function ($rq, $rs, $args) {
-    return (new \lbs\command\control\CommandesController($this))->getCommand($rq, $rs, $args);
-})->add("checkToken");
-$app->post('/commandes/{nom}/{mail}', function ($rq, $rs, $args) {
-    return (new \lbs\command\control\CommandesController($this))->insertCommand($rq, $rs, $args);
-});
+    return (new lbs\command\control\CommandesController($this))->getCommand($rq, $rs, $args);
+})->add(lbs\command\control\Middleware::class . ':getToken')->add(\lbs\command\control\Middleware::class . ':checkToken');
+
+$app->get('/commandes/{id}/items', function ($rq, $rs, $args) {
+    return (new lbs\command\control\CommandesController($this))->getCommandItems($rq, $rs, $args);
+})->add(lbs\command\control\Middleware::class . ':getToken')->add(\lbs\command\control\Middleware::class . ':checkToken');
+
+//todo do we need to get the user info from the uri or from the request's body?
+$app->post('/commandes', function ($rq, $rs, $args) {
+    return (new lbs\command\control\CommandesController($this))->insertCommand($rq, $rs, $args);
+})->add(lbs\command\control\Middleware::class . ':decodeJWT')->add(lbs\command\control\Middleware::class . ':checkJWT')->add(lbs\command\control\Middleware::class . ':checkEmail');
+
 $app->put('/commandes/{id}/{data}/{value}', function ($rq, $rs, $args) {
-    return (new \lbs\command\control\CommandesController($this))->updateCommand($rq, $rs, $args);
+    return (new lbs\command\control\CommandesController($this))->updateCommand($rq, $rs, $args);
 });
-$app->post('/authentication/{nom}/{mail}', function ($rq, $rs, $args) {
-    return (new \lbs\command\control\CommandesController($this))->userAuthentication($rq, $rs, $args);
-});
-$app->get('/profil/', function ($rq, $rs, $args) {
-    return (new \lbs\command\control\CommandesController($this))->userAuthentication($rq, $rs, $args);
-})->add("checkJWT");
+$app->post('/clients/{user_id}/auth', function ($rq, $rs, $args) {
+    return (new lbs\command\control\UserController($this))->userAuthentication($rq, $rs, $args);
+})->add(lbs\command\control\Middleware::class . ':decodeAuthorization')->add(lbs\command\control\Middleware::class . ':checkAuthorization');
+
+$app->get('/clients/{user_id}', function ($rq, $rs, $args) {
+    return (new lbs\command\control\UserController($this))->userProfile($rq, $rs, $args);
+})->add(lbs\command\control\Middleware::class . ':decodeJWT')->add(lbs\command\control\Middleware::class . ':checkJWT');
+
 $app->run();
