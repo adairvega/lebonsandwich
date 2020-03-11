@@ -117,6 +117,10 @@ class CommandesController
 
     public function insertCommand(Request $req, Response $resp, array $args)
     {
+        $req->getAttribute('has_errors');
+        $errors = $req->getAttribute('errors');
+        var_dump($errors); ;
+        die("pincheeee");
         $body = $req->getParsedBody();
         $client_id = $body["client_id"];
         $client_mail = $body["mail"];

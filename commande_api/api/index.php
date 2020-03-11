@@ -5,6 +5,7 @@ require '../src/vendor/autoload.php';
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use \lbs\common\bootstrap\Eloquent;
+use \DavidePastore\Slim\Validation\Validation as Validation;
 
 
 $config = parse_ini_file("../src/conf/conf.ini");
@@ -23,7 +24,6 @@ $app = new \Slim\App([
         'whoops.editor' => 'sublime',
     ]]);
 
-
 $app->get('/commandes[/]', function ($rq, $rs, $args) {
     return (new lbs\command\control\CommandesController($this))->getCommands($rq, $rs, $args);
 });
@@ -39,7 +39,7 @@ $app->get('/commandes/{id}/items', function ($rq, $rs, $args) {
 //todo do we need to get the user info from the uri or from the request's body?
 $app->post('/commandes', function ($rq, $rs, $args) {
     return (new lbs\command\control\CommandesController($this))->insertCommand($rq, $rs, $args);
-})->add(lbs\command\control\Middleware::class . ':decodeJWT')->add(lbs\command\control\Middleware::class . ':checkJWT')->add(lbs\command\control\Middleware::class . ':checkEmail');
+})->add(new Validation(lbs\command\api\middlewares\CommandValidator::class . ':validators'))->add(lbs\command\control\Middleware::class . ':decodeJWT')->add(lbs\command\control\Middleware::class . ':checkJWT')->add(lbs\command\control\Middleware::class . ':checkEmail');
 
 $app->put('/commandes/{id}/{data}/{value}', function ($rq, $rs, $args) {
     return (new lbs\command\control\CommandesController($this))->updateCommand($rq, $rs, $args);
