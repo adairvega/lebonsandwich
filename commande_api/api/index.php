@@ -1,12 +1,21 @@
 <?php
-
+/**
+ * @api {get} /user/:id Request User information
+ * @apiName GetUser
+ * @apiGroup User
+ *
+ * @apiParam {Number} id Users unique ID.
+ *
+ * @apiSuccess {String} firstname Firstname of the User.
+ * @apiSuccess {String} lastname  Lastname of the User.
+ */
 require '../src/vendor/autoload.php';
 
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use \lbs\common\bootstrap\Eloquent;
 use \DavidePastore\Slim\Validation\Validation as Validation;
-
+use \lbs\command\api\middlewares\Middleware as middleware;
 
 $config = parse_ini_file("../src/conf/conf.ini");
 $db = new Illuminate\Database\Capsule\Manager();
@@ -39,7 +48,7 @@ $app->get('/commandes/{id}/items', function ($rq, $rs, $args) {
 //todo do we need to get the user info from the uri or from the request's body?
 $app->post('/commandes', function ($rq, $rs, $args) {
     return (new lbs\command\control\CommandesController($this))->insertCommand($rq, $rs, $args);
-})->add(new Validation(lbs\command\api\middlewares\CommandValidator::class . ':validators'))->add(lbs\command\control\Middleware::class . ':decodeJWT')->add(lbs\command\control\Middleware::class . ':checkJWT')->add(lbs\command\control\Middleware::class . ':checkEmail');
+})->add(new Validation(lbs\command\api\middlewares\CommandValidator::class . ':validators'))->add(middleware::class . ':decodeJWT')->add(middleware::class . ':checkToken');
 
 $app->put('/commandes/{id}/{data}/{value}', function ($rq, $rs, $args) {
     return (new lbs\command\control\CommandesController($this))->updateCommand($rq, $rs, $args);

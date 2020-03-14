@@ -1,7 +1,7 @@
 <?php
 
 
-namespace lbs\command\control;
+namespace lbs\command\api\middlewares;
 
 use Firebase\JWT\JWT;
 use \lbs\common\bootstrap\Eloquent;

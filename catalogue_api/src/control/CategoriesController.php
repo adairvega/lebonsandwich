@@ -101,4 +101,41 @@ class CategoriesController
         $rs->getBody()->write(json_encode([$order]));
         return $rs;
     }
+
+
+    public function getCategories(Request $req, Response $resp, array $args)
+    {
+        $c = new \MongoDB\Client("mongodb://dbcat");
+        $categories = $c->mongo->categories->find();
+        foreach ($categories as $category) {
+            $order = array();
+            $order["categories"]["id"] = $category->id;
+            $order["categories"]["nom"] = $category->nom;
+            $order["categories"]["description"] = $category->description;
+            $orders["sandwich"][] = $order;
+        }
+        $rs = $resp->withStatus(200)
+            ->withHeader('Content-Type', 'application/json;charset=utf-8');
+        $rs->getBody()->write(json_encode($orders["sandwich"]));
+        return $rs;
+    }
+
+
+    public function getSandwichs(Request $req, Response $resp, array $args)
+    {
+        $c = new \MongoDB\Client("mongodb://dbcat");
+        $sandwichs = $c->mongo->sandwichs->find();
+        foreach ($sandwichs as $sandwich) {
+            $order = array();
+            $order["sandwichs"]["ref"] = $sandwich->ref;
+            $order["sandwichs"]["nom"] = $sandwich->nom;
+            $order["sandwichs"]["description"] = $sandwich->description;
+            $order["sandwichs"]["type_pain"] = $sandwich->type_pain;
+            $orders["sandwichs"][] = $order;
+        }
+        $rs = $resp->withStatus(200)
+            ->withHeader('Content-Type', 'application/json;charset=utf-8');
+        $rs->getBody()->write(json_encode($orders["sandwichs"]));
+        return $rs;
+    }
 }
