@@ -117,21 +117,18 @@ class CommandesController
 
     public function insertCommand(Request $req, Response $resp, array $args)
     {
-        $req->getAttribute('has_errors');
-        $errors = $req->getAttribute('errors');
-        var_dump($errors); ;
-        die("pincheeee");
-        $body = $req->getParsedBody();
-        $client_id = $body["client_id"];
-        $client_mail = $body["mail"];
-        $client_nom = $body["nom"];
-        $token = $req->getAttribute("token");
-        $token_uid = $token->uid;
-        if ($client_id == $token_uid) {
-            try {
-                $client = new Client([
-                    "base_uri" => "http://api.catalogue.local"
-                ]);
+        if ($req->getAttribute('has_errors')) {
+            $errors = $req->getAttribute('errors');
+            var_dump($errors);
+        } else {
+            $body = $req->getParsedBody();
+            $client_id = $body["client_id"];
+            $client_mail = $body["mail"];
+            $client_nom = $body["nom"];
+            $token = $req->getAttribute("token");
+            $token_uid = $token->uid;
+            if ($client_id == $token_uid) {
+                $client = new Client(["base_uri" => "http://api.catalogue.local"]);
                 $prix_commande = 0;
                 $getBody = json_decode($req->getBody());
                 foreach ($getBody->items as $item) {
@@ -182,18 +179,12 @@ class CommandesController
                     "items" => $getBody->items
                 ]));
                 return $rs;
-            } catch
-            (ModelNotFoundException $e) {
+            } else {
                 $rs = $resp->withStatus(404)
                     ->withHeader('Content-Type', 'application/json;charset=utf-8');
-                $rs->getBody()->write(json_encode(['Error_code' => 404, 'Error message' => $e->getMessage()]));
+                $rs->getBody()->write(json_encode(['Error_code' => 404, 'Error message' => "token and user id given not corresponding"]));
                 return $rs;
             }
-        } else {
-            $rs = $resp->withStatus(404)
-                ->withHeader('Content-Type', 'application/json;charset=utf-8');
-            $rs->getBody()->write(json_encode(['Error_code' => 404, 'Error message' => "token and user id given not corresponding"]));
-            return $rs;
         }
     }
 

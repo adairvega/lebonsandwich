@@ -1,7 +1,7 @@
 <?php
 
 
-namespace lbs\command\api\middlewares;
+namespace lbs\command\control;
 
 use Firebase\JWT\JWT;
 use \lbs\common\bootstrap\Eloquent;
@@ -32,8 +32,7 @@ class Middleware
             return $rs;
         }
     }
-
-    //todo is it a good practice to do the decode of Basic Auth inside a middleware ?
+    
     public function decodeAuthorization(Request $rq, Response $rs, callable $next)
     {
         $getHeader = $rq->getAttribute("getHeader");
@@ -62,7 +61,6 @@ class Middleware
         }
     }
 
-
     function getToken(Request $rq, Response $rs, callable $next)
     {
         $token = $rq->getAttribute("token");
@@ -83,22 +81,6 @@ class Middleware
         }
     }
 
-    //TODO is it a good usage to check email format inside a middleware ?
-    public function checkEmail(Request $rq, Response $rs, callable $next)
-    {
-        $body = $rq->getParsedBody();
-        $email = $body["mail"];
-        if (filter_var($email, FILTER_VALIDATE_EMAIL) == !0) {
-            $email = filter_var($email, FILTER_VALIDATE_EMAIL);
-            $rq = $rq->withAttribute("email", $email);
-            return $next($rq, $rs);
-        } else {
-            $rs = $rs->withStatus(401)
-                ->withHeader('Content-Type', 'application/json;charset=utf-8');
-            $rs->getBody()->write(json_encode(['type' => 'error', 'Error_code' => 401, 'message :' => 'email format not valid']));
-            return $rs;
-        }
-    }
 
     function decodeJWT(Request $rq, Response $rs, callable $next)
     {
