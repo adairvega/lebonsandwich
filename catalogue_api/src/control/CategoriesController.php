@@ -9,6 +9,7 @@ use phpDocumentor\Reflection\Types\Integer;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use \lbs\command\model\Commande as commande;
+use function GuzzleHttp\Psr7\str;
 
 class CategoriesController
 {
@@ -80,6 +81,61 @@ class CategoriesController
             "date" => date("Y-m-d"),
             "categorie" => $order,
             "links" => $links]));
+        return $rs;
+    }
+
+
+    public function getNameSandwich(Request $req, Response $resp, array $args)
+    {
+        $c = new \MongoDB\Client("mongodb://dbcat");
+        $uri = (string)$args["uri"];
+        $sandwichs = $c->mongo->sandwichs->find(["ref" => $uri]);
+        foreach ($sandwichs as $sandwich) {
+            $order = array();
+            $order["ref"] = "/sandwichs/" . $sandwich->ref;
+            $order["nom"] = $sandwich->nom;
+            $order["prix"] = (string)$sandwich->prix;
+        }
+        $rs = $resp->withStatus(200)
+            ->withHeader('Content-Type', 'application/json;charset=utf-8');
+        $rs->getBody()->write(json_encode([$order]));
+        return $rs;
+    }
+
+
+    public function getCategories(Request $req, Response $resp, array $args)
+    {
+        $c = new \MongoDB\Client("mongodb://dbcat");
+        $categories = $c->mongo->categories->find();
+        foreach ($categories as $category) {
+            $order = array();
+            $order["categories"]["id"] = $category->id;
+            $order["categories"]["nom"] = $category->nom;
+            $order["categories"]["description"] = $category->description;
+            $orders["sandwich"][] = $order;
+        }
+        $rs = $resp->withStatus(200)
+            ->withHeader('Content-Type', 'application/json;charset=utf-8');
+        $rs->getBody()->write(json_encode($orders["sandwich"]));
+        return $rs;
+    }
+
+
+    public function getSandwichs(Request $req, Response $resp, array $args)
+    {
+        $c = new \MongoDB\Client("mongodb://dbcat");
+        $sandwichs = $c->mongo->sandwichs->find();
+        foreach ($sandwichs as $sandwich) {
+            $order = array();
+            $order["sandwichs"]["ref"] = $sandwich->ref;
+            $order["sandwichs"]["nom"] = $sandwich->nom;
+            $order["sandwichs"]["description"] = $sandwich->description;
+            $order["sandwichs"]["type_pain"] = $sandwich->type_pain;
+            $orders["sandwichs"][] = $order;
+        }
+        $rs = $resp->withStatus(200)
+            ->withHeader('Content-Type', 'application/json;charset=utf-8');
+        $rs->getBody()->write(json_encode($orders["sandwichs"]));
         return $rs;
     }
 }
