@@ -32,7 +32,7 @@ class Middleware
             return $rs;
         }
     }
-    
+
     public function decodeAuthorization(Request $rq, Response $rs, callable $next)
     {
         $getHeader = $rq->getAttribute("getHeader");
@@ -79,6 +79,27 @@ class Middleware
             $rs->getBody()->write(json_encode(['type' => 'error', 'Error_code' => 401, 'message :' => 'no JWT found in Authorization']));
             return $rs;
         }
+    }
+
+    public function checkHeaderOrigin(Request $rq, Response $rs, callable $next)
+    {
+        if ($rq->getHeader('Origin')) {
+            return $next($rq, $rs);
+        } else {
+            $rs = $rs->withStatus(401)
+                ->withHeader('Content-Type', 'application/json;charset=utf-8');
+            $rs->getBody()->write(json_encode(['type' => 'error', 'Error_code' => 401, 'message :' => 'no Origin Header found']));
+            return $rs;
+        }
+    }
+
+    public function headersCORS(Request $rq, Response $rs, callable $next)
+    {
+        $response = $next($rq, $rs)
+            ->withHeader('Access-Control-Allow-Origin', '*')
+            ->withHeader('Access-Control-Allow-Headers', '*')
+            ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+        return $response;
     }
 
 

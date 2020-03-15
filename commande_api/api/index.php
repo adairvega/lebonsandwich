@@ -24,29 +24,30 @@ $app = new \Slim\App([
 
 $app->get('/commandes[/]', function ($rq, $rs, $args) {
     return (new lbs\command\control\CommandesController($this))->getCommands($rq, $rs, $args);
-});
+})->add(lbs\command\control\Middleware::class . ':headersCORS')->add(lbs\command\control\Middleware::class . ':checkHeaderOrigin');
 
 $app->get('/commandes/{id}[/]', function ($rq, $rs, $args) {
     return (new lbs\command\control\CommandesController($this))->getCommand($rq, $rs, $args);
-})->add(lbs\command\control\Middleware::class . ':getToken')->add(\lbs\command\control\Middleware::class . ':checkToken');
+})->add(lbs\command\control\Middleware::class . ':headersCORS')->add(lbs\command\control\Middleware::class . ':checkHeaderOrigin')->add(lbs\command\control\Middleware::class . ':getToken')->add(\lbs\command\control\Middleware::class . ':checkToken');
 
 $app->get('/commandes/{id}/items', function ($rq, $rs, $args) {
     return (new lbs\command\control\CommandesController($this))->getCommandItems($rq, $rs, $args);
-})->add(lbs\command\control\Middleware::class . ':getToken')->add(\lbs\command\control\Middleware::class . ':checkToken');
+})->add(lbs\command\control\Middleware::class . ':headersCORS')->add(lbs\command\control\Middleware::class . ':checkHeaderOrigin')->add(lbs\command\control\Middleware::class . ':getToken')->add(\lbs\command\control\Middleware::class . ':checkToken');
 
 $app->post('/commandes', function ($rq, $rs, $args) {
     return (new lbs\command\control\CommandesController($this))->insertCommand($rq, $rs, $args);
-})->add(new Validation(lbs\command\control\CommandValidator::validators()))->add(lbs\command\control\Middleware::class . ':decodeJWT')->add(lbs\command\control\Middleware::class . ':checkJWT');
+})->add(lbs\command\control\Middleware::class . ':headersCORS')->add(lbs\command\control\Middleware::class . ':checkHeaderOrigin')->add(new Validation(lbs\command\control\CommandValidator::validators()))->add(lbs\command\control\Middleware::class . ':decodeJWT')->add(lbs\command\control\Middleware::class . ':checkJWT');
 
 $app->put('/commandes/{id}/{data}/{value}', function ($rq, $rs, $args) {
     return (new lbs\command\control\CommandesController($this))->updateCommand($rq, $rs, $args);
-});
+})->add(lbs\command\control\Middleware::class . ':headersCORS')->add(lbs\command\control\Middleware::class . ':checkHeaderOrigin');
+
 $app->post('/clients/{user_id}/auth', function ($rq, $rs, $args) {
     return (new lbs\command\control\UserController($this))->userAuthentication($rq, $rs, $args);
-})->add(lbs\command\control\Middleware::class . ':decodeAuthorization')->add(lbs\command\control\Middleware::class . ':checkAuthorization');
+})->add(lbs\command\control\Middleware::class . ':headersCORS')->add(lbs\command\control\Middleware::class . ':checkHeaderOrigin')->add(lbs\command\control\Middleware::class . ':decodeAuthorization')->add(lbs\command\control\Middleware::class . ':checkAuthorization');
 
 $app->get('/clients/{user_id}', function ($rq, $rs, $args) {
     return (new lbs\command\control\UserController($this))->userProfile($rq, $rs, $args);
-})->add(lbs\command\control\Middleware::class . ':decodeJWT')->add(lbs\command\control\Middleware::class . ':checkJWT');
+})->add(lbs\command\control\Middleware::class . ':headersCORS')->add(lbs\command\control\Middleware::class . ':checkHeaderOrigin')->add(lbs\command\control\Middleware::class . ':decodeJWT')->add(lbs\command\control\Middleware::class . ':checkJWT');
 
 $app->run();
