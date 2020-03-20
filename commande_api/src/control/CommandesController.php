@@ -189,34 +189,6 @@ class CommandesController
         }
     }
 
-    public function updateCommand(Request $req, Response $resp, array $args)
-    {
-        if ($commande_test = commande::find($args["id"])) {
-            switch ($args["data"]) {
-                case "mail":
-                    if (filter_var($args['value'], FILTER_VALIDATE_EMAIL) == !0) {
-                        $commande_test->mail = filter_var($args['value'], FILTER_VALIDATE_EMAIL);
-                        $commande_test->save();
-                    } else {
-                        echo "please use a valid email format";
-                    }
-                    break;
-                case "nom":
-                    $commande_test->nom = filter_var($args['value'], FILTER_SANITIZE_STRING);
-                    $commande_test->save();
-                    break;
-            }
-            $rs = $resp->withStatus(200)
-                ->withHeader('Content-Type', 'application/json;charset=utf-8');
-            $rs->getBody()->write(json_encode($commande_test));
-            return $rs;
-        } else {
-            $rs = $resp->withStatus(404)
-                ->withHeader('Content-Type', 'application/json;charset=utf-8');
-            $rs->getBody()->write(json_encode(['Error_code' => 404, 'please enter an existing id']));
-            return $rs;
-        }
-    }
 
     public function insertCommand(Request $req, Response $resp, array $args)
     {

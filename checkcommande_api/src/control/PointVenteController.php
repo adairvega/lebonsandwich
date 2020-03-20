@@ -11,7 +11,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use \lbs\command\model\Commande as commande;
 
-class pointVenteController
+class PointVenteController
 {
     protected $c;
 
@@ -49,6 +49,39 @@ class pointVenteController
             $rs = $resp->withStatus(404)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
             $rs->getBody()->write(json_encode(['Error_code' => 404, 'Error message' => $e->getMessage()]));
+            return $rs;
+        }
+    }
+
+
+    public function updateCommand(Request $req, Response $resp, array $args)
+    {
+        if ($commande = commande::find($args["id"])) {
+            $body = $req->getParsedBody();
+            if (!empty($body["status"])) {
+                if ($body["status"] > 0 and $body["status"] <= 4) {
+                    $commande->status = $body["status"];
+                    $commande->save();
+                    $rs = $resp->withStatus(200)
+                        ->withHeader('Content-Type', 'application/json;charset=utf-8');
+                    $rs->getBody()->write(json_encode($commande));
+                    return $rs;
+                } else {
+                    $res = $resp->withStatus(404)
+                        ->withHeader('Content-Type', 'application/json;charset=utf-8');
+                    $res->getBody()->write(json_encode(['Error_code' => 404, 'status value expected to be between 1 and 4']));
+                    return $res;
+                }
+            } else {
+                $rs = $resp->withStatus(404)
+                    ->withHeader('Content-Type', 'application/json;charset=utf-8');
+                $rs->getBody()->write(json_encode(['Error_code' => 404, 'please send a status']));
+                return $rs;
+            }
+        } else {
+            $rs = $resp->withStatus(404)
+                ->withHeader('Content-Type', 'application/json;charset=utf-8');
+            $rs->getBody()->write(json_encode(['Error_code' => 404, 'no command existing with this id']));
             return $rs;
         }
     }

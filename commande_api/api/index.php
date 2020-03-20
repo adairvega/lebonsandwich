@@ -42,10 +42,6 @@ $app->post('/commandes/auth', function ($rq, $rs, $args) {
     return (new lbs\command\control\CommandesController($this))->insertCommandAuth($rq, $rs, $args);
 })->add(lbs\command\control\Middleware::class . ':headersCORS')->add(lbs\command\control\Middleware::class . ':checkHeaderOrigin')->add(new Validation(lbs\command\control\CommandValidator::validators()))->add(lbs\command\control\Middleware::class . ':decodeJWT')->add(lbs\command\control\Middleware::class . ':checkJWT');
 
-$app->put('/commandes/{id}/{data}/{value}', function ($rq, $rs, $args) {
-    return (new lbs\command\control\CommandesController($this))->updateCommand($rq, $rs, $args);
-})->add(lbs\command\control\Middleware::class . ':headersCORS')->add(lbs\command\control\Middleware::class . ':checkHeaderOrigin');
-
 $app->get('/client/{user_id}', function ($rq, $rs, $args) {
     return (new lbs\command\control\UserController($this))->userProfile($rq, $rs, $args);
 })->add(lbs\command\control\Middleware::class . ':headersCORS')->add(lbs\command\control\Middleware::class . ':checkHeaderOrigin')->add(lbs\command\control\Middleware::class . ':decodeJWT')->add(lbs\command\control\Middleware::class . ':checkJWT');
