@@ -108,7 +108,7 @@ class CommandesController
                 "commandes" => $orders["commandes"]]));
             return $rs;
         } catch (Exception $e) {
-            return Writer::json_error($rs, 404, $e->getMessage());
+            return Writer::json_error($rs, 400, $e->getMessage());
         }
     }
 
@@ -127,9 +127,9 @@ class CommandesController
                 "commandes" => $cde]));
             return $rs;
         } catch (ModelNotFoundException $e) {
-            $rs = $resp->withStatus(404)
+            $rs = $resp->withStatus(400)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
-            $rs->getBody()->write(json_encode(['Error_code' => 404, 'Error message' => $e->getMessage()]));
+            $rs->getBody()->write(json_encode(['Error_code' => 400, 'Error message' => $e->getMessage()]));
             return $rs;
         }
     }
@@ -184,9 +184,9 @@ class CommandesController
             $rs->getBody()->write(json_encode($commande_test));
             return $rs;
         } else {
-            $rs = $resp->withStatus(404)
+            $rs = $resp->withStatus(400)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
-            $rs->getBody()->write(json_encode(['Error_code' => 404, 'please enter an existing id']));
+            $rs->getBody()->write(json_encode(['Error_code' => 400, 'please enter an existing id']));
             return $rs;
         }
     }

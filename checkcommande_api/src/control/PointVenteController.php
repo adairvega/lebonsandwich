@@ -36,7 +36,7 @@ class PointVenteController
             $order["items"] = $items;
             $links = array(
                 "self" => "http://api.checkcommande.local:19280/commandes/" . $id,
-                "items" => "http://api.checkcommande.local:19280/commands/" . $id . "/items"
+                "items" => "http://api.checkcommande.local:19280/commandes/" . $id . "/items"
             );
             $rs = $resp->withStatus(200)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
@@ -46,9 +46,9 @@ class PointVenteController
                 "command" => $order]));
             return $rs;
         } catch (ModelNotFoundException $e) {
-            $rs = $resp->withStatus(404)
+            $rs = $resp->withStatus(400)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
-            $rs->getBody()->write(json_encode(['Error_code' => 404, 'Error message' => $e->getMessage()]));
+            $rs->getBody()->write(json_encode(['Error_code' => 400, 'Error message' => $e->getMessage()]));
             return $rs;
         }
     }
@@ -57,7 +57,8 @@ class PointVenteController
     public function updateCommand(Request $req, Response $resp, array $args)
     {
         if ($commande = commande::find($args["id"])) {
-            $body = $req->getParsedBody();
+            $getBody = $req->getBody();
+            $body = json_decode($getBody, true);
             if (!empty($body["status"])) {
                 if ($body["status"] > 0 and $body["status"] <= 4) {
                     $commande->status = $body["status"];
@@ -67,21 +68,21 @@ class PointVenteController
                     $rs->getBody()->write(json_encode($commande));
                     return $rs;
                 } else {
-                    $res = $resp->withStatus(404)
+                    $res = $resp->withStatus(400)
                         ->withHeader('Content-Type', 'application/json;charset=utf-8');
-                    $res->getBody()->write(json_encode(['Error_code' => 404, 'status value expected to be between 1 and 4']));
+                    $res->getBody()->write(json_encode(['Error_code' => 400, 'status value expected to be between 1 and 4']));
                     return $res;
                 }
             } else {
-                $rs = $resp->withStatus(404)
+                $rs = $resp->withStatus(400)
                     ->withHeader('Content-Type', 'application/json;charset=utf-8');
-                $rs->getBody()->write(json_encode(['Error_code' => 404, 'please send a status']));
+                $rs->getBody()->write(json_encode(['Error_code' => 400, 'please send a status']));
                 return $rs;
             }
         } else {
-            $rs = $resp->withStatus(404)
+            $rs = $resp->withStatus(400)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
-            $rs->getBody()->write(json_encode(['Error_code' => 404, 'no command existing with this id']));
+            $rs->getBody()->write(json_encode(['Error_code' => 400, 'no command existing with this id']));
             return $rs;
         }
     }
@@ -93,7 +94,6 @@ class PointVenteController
             $id = $args['id'];
             $cde = Commande::findOrFail($id);
             $items = $cde->commandeItems()->get();
-
             $rs = $resp->withStatus(200)->withHeader('Content-Type', 'application/json;charset=utf-8');
             $rs->getBody()->write(json_encode([
                 "type" => "item",
@@ -102,9 +102,9 @@ class PointVenteController
             ]));
             return $rs;
         } catch (ModelNotFoundException $e) {
-            $rs = $resp->withStatus(404)
+            $rs = $resp->withStatus(400)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
-            $rs->getBody()->write(json_encode(['Error_code' => 404, 'Error message' => $e->getMessage()]));
+            $rs->getBody()->write(json_encode(['Error_code' => 400, 'Error message' => $e->getMessage()]));
             return $rs;
         }
     }
