@@ -148,16 +148,16 @@ class PointVenteController
                     $page = (int)$query[$uri_key[0]];
                     $links = array(
                         "next" => array(
-                            "href" => "http://api.checkcommande.local:19280/commandes/?page=" . ($page + 1) . "&size=" . $size,
+                            "href" => "http://api.checkcommande.local:19280/commandes?page=" . ($page + 1) . "&size=" . $size,
                         ),
                         "prev" => array(
-                            "href" => "http://api.checkcommande.local:19280/commandes/?page=" . ($page - 1) . "&size=" . $size,
+                            "href" => "http://api.checkcommande.local:19280/commandes?page=" . ($page - 1) . "&size=" . $size,
                         ),
                         "last" => array(
-                            "href" => "http://api.checkcommande.local:19280/commandes/?page=" . round($total_pages) . "&size=" . $size,
+                            "href" => "http://api.checkcommande.local:19280/commandes?page=" . round($total_pages) . "&size=" . $size,
                         ),
                         "first" => array(
-                            "href" => "http://api.checkcommande.local:19280/commandes/?page=1&size=" . $size,
+                            "href" => "http://api.checkcommande.local:19280/commandes?page=1&size=" . $size,
                         )
                     );
                 } else {
