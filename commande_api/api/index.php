@@ -22,6 +22,10 @@ $app = new \Slim\App([
         'whoops.editor' => 'sublime',
     ]]);
 
+$app->options('/{routes:.+}', function ($request, $response, $args) {
+    return $response;
+})->add(\lbs\command\control\Middleware::class . ':headersCORS');
+
 $app->get('/commandes[/]', function ($rq, $rs, $args) {
     return (new lbs\command\control\CommandesController($this))->getCommands($rq, $rs, $args);
 })->add(lbs\command\control\Middleware::class . ':headersCORS')->add(lbs\command\control\Middleware::class . ':checkHeaderOrigin');
