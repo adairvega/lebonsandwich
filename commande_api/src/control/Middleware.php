@@ -28,7 +28,7 @@ class Middleware
         } else {
             $rs = $rs->withStatus(401)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
-            $rs->getBody()->write(json_encode(['type' => 'error', 'Error_code' => 401, 'message :' => 'no data in Basic Authorization']));
+            $rs->getBody()->write(json_encode(['type' => 'error', 'Error_code' => 401, 'message :' => 'no authorization header present']));
             return $rs;
         }
     }
@@ -41,7 +41,7 @@ class Middleware
         $dote_position = strpos($getHeader_value_decode, ':');
         $user_name = substr($getHeader_value_decode, 0, $dote_position);
         $user_passwd = substr($getHeader_value_decode, $dote_position + 1);
-        $rq = $rq->withAttribute("user_name", $user_name);
+        $rq = $rq->withAttribute("user_email", $user_name);
         $rq = $rq->withAttribute("user_passwd", $user_passwd);
         return $next($rq, $rs);
     }
@@ -56,7 +56,7 @@ class Middleware
         } else {
             $rs = $rs->withStatus(401)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
-            $rs->getBody()->write(json_encode(['type' => 'error', 'Error_code' => 401, 'message :' => 'no token found in URL']));
+            $rs->getBody()->write(json_encode(['type' => 'error', 'Error_code' => 401, 'message :' => 'no token found']));
             return $rs;
         }
     }

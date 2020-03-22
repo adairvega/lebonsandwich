@@ -4,13 +4,14 @@ namespace lbs\command\control;
 
 use Doctrine\Instantiator\Exception\ExceptionInterface;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use lbs\command\model\Item;
 use MongoDB\Driver\WriteError;
 use phpDocumentor\Reflection\Types\Integer;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use \lbs\command\model\Commande as commande;
 
-class CommandesController
+class PointVenteController
 {
     protected $c;
 
@@ -18,6 +19,96 @@ class CommandesController
     {
         $this->c = $c;
     }
+
+    public function getCommand(Request $req, Response $resp, array $args)
+    {
+        try {
+            $id = $args['id'];
+            $cde = commande::findOrFail($id);
+            $items = $cde->commandeItems()->select("uri", "libelle", "tarif", "quantite")->get();
+            $order = array();
+            $order["id"] = $cde->id;
+            $order["created_at"] = $cde->created_at;
+            $order["livraison"] = $cde->livraison;
+            $order["nom"] = $cde->nom;
+            $order["mail"] = $cde->mail;
+            $order["montant"] = $cde->montant;
+            $order["items"] = $items;
+            $links = array(
+                "self" => "http://api.checkcommande.local:19280/commandes/" . $id,
+                "items" => "http://api.checkcommande.local:19280/commandes/" . $id . "/items"
+            );
+            $rs = $resp->withStatus(200)
+                ->withHeader('Content-Type', 'application/json;charset=utf-8');
+            $rs->getBody()->write(json_encode([
+                "type" => "resource",
+                "links" => $links,
+                "command" => $order]));
+            return $rs;
+        } catch (ModelNotFoundException $e) {
+            $rs = $resp->withStatus(400)
+                ->withHeader('Content-Type', 'application/json;charset=utf-8');
+            $rs->getBody()->write(json_encode(['Error_code' => 400, 'Error message' => $e->getMessage()]));
+            return $rs;
+        }
+    }
+
+
+    public function updateCommand(Request $req, Response $resp, array $args)
+    {
+        if ($commande = commande::find($args["id"])) {
+            $getBody = $req->getBody();
+            $body = json_decode($getBody, true);
+            if (!empty($body["status"])) {
+                if ($body["status"] > 0 and $body["status"] <= 4) {
+                    $commande->status = $body["status"];
+                    $commande->save();
+                    $rs = $resp->withStatus(200)
+                        ->withHeader('Content-Type', 'application/json;charset=utf-8');
+                    $rs->getBody()->write(json_encode($commande));
+                    return $rs;
+                } else {
+                    $res = $resp->withStatus(400)
+                        ->withHeader('Content-Type', 'application/json;charset=utf-8');
+                    $res->getBody()->write(json_encode(['Error_code' => 400, 'status value expected to be between 1 and 4']));
+                    return $res;
+                }
+            } else {
+                $rs = $resp->withStatus(400)
+                    ->withHeader('Content-Type', 'application/json;charset=utf-8');
+                $rs->getBody()->write(json_encode(['Error_code' => 400, 'please send a status']));
+                return $rs;
+            }
+        } else {
+            $rs = $resp->withStatus(400)
+                ->withHeader('Content-Type', 'application/json;charset=utf-8');
+            $rs->getBody()->write(json_encode(['Error_code' => 400, 'no command existing with this id']));
+            return $rs;
+        }
+    }
+
+
+    public function getItems(Request $req, Response $resp, array $args)
+    {
+        try {
+            $id = $args['id'];
+            $cde = Commande::findOrFail($id);
+            $items = $cde->commandeItems()->get();
+            $rs = $resp->withStatus(200)->withHeader('Content-Type', 'application/json;charset=utf-8');
+            $rs->getBody()->write(json_encode([
+                "type" => "item",
+                "id" => $id,
+                "items" => $items
+            ]));
+            return $rs;
+        } catch (ModelNotFoundException $e) {
+            $rs = $resp->withStatus(400)
+                ->withHeader('Content-Type', 'application/json;charset=utf-8');
+            $rs->getBody()->write(json_encode(['Error_code' => 400, 'Error message' => $e->getMessage()]));
+            return $rs;
+        }
+    }
+
 
     public function getCommands(Request $req, Response $resp, array $args)
     {
@@ -57,16 +148,16 @@ class CommandesController
                     $page = (int)$query[$uri_key[0]];
                     $links = array(
                         "next" => array(
-                            "href" => "http://api.checkcommande.local:19280/commandes/?page=" . ($page + 1) . "&size=" . $size,
+                            "href" => "http://api.checkcommande.local:19280/commandes?page=" . ($page + 1) . "&size=" . $size,
                         ),
                         "prev" => array(
-                            "href" => "http://api.checkcommande.local:19280/commandes/?page=" . ($page - 1) . "&size=" . $size,
+                            "href" => "http://api.checkcommande.local:19280/commandes?page=" . ($page - 1) . "&size=" . $size,
                         ),
                         "last" => array(
-                            "href" => "http://api.checkcommande.local:19280/commandes/?page=" . round($total_pages) . "&size=" . $size,
+                            "href" => "http://api.checkcommande.local:19280/commandes?page=" . round($total_pages) . "&size=" . $size,
                         ),
                         "first" => array(
-                            "href" => "http://api.checkcommande.local:19280/commandes/?page=1&size=" . $size,
+                            "href" => "http://api.checkcommande.local:19280/commandes?page=1&size=" . $size,
                         )
                     );
                 } else {
@@ -108,86 +199,7 @@ class CommandesController
                 "commandes" => $orders["commandes"]]));
             return $rs;
         } catch (Exception $e) {
-            return Writer::json_error($rs, 404, $e->getMessage());
-        }
-    }
-
-    public function getCommand(Request $req, Response $resp, array $args)
-    {
-        try {
-            $id = $args['id'];
-
-            $cde = \lbs\command\model\Commande::findOrFail($id);
-
-            $rs = $resp->withStatus(200)
-                ->withHeader('Content-Type', 'application/json;charset=utf-8');
-
-            $rs->getBody()->write(json_encode([
-                "type" => "collection",
-                "commandes" => $cde]));
-            return $rs;
-        } catch (ModelNotFoundException $e) {
-            $rs = $resp->withStatus(404)
-                ->withHeader('Content-Type', 'application/json;charset=utf-8');
-            $rs->getBody()->write(json_encode(['Error_code' => 404, 'Error message' => $e->getMessage()]));
-            return $rs;
-        }
-    }
-
-
-    public function insertCommand(Request $req, Response $resp, array $args)
-    {
-        try {
-            if (filter_var($args['mail'], FILTER_VALIDATE_EMAIL) == !0) {
-                $commande_test = new commande();
-                $commande_test->id = uniqid();
-                $commande_test->nom = (filter_var($args['nom'], FILTER_SANITIZE_STRING));
-                $commande_test->livraison = date("Y-m-d h:i:s");
-                $commande_test->mail = filter_var($args['mail'], FILTER_VALIDATE_EMAIL);
-                $commande_test->save();
-                $rs = $resp->withStatus(201)
-                    ->withHeader('Location', 'http://api.commande.local:19080/commandes/' . $commande_test->id)
-                    ->withHeader('Content-Type', 'application/json;charset=utf-8');
-                $rs->getBody()->write(json_encode(commande::find($commande_test->id)));
-                return $rs;
-            } else {
-                echo "please insert a valid email address";
-            }
-        } catch (ModelNotFoundException $e) {
-            $rs = $resp->withStatus(500)
-                ->withHeader('Content-Type', 'application/json;charset=utf-8');
-            $rs->getBody()->write(json_encode(['Error_code' => 500, 'Error message' => $e->getMessage()]));
-            return $rs;
-        }
-    }
-
-
-    public function updateCommand(Request $req, Response $resp, array $args)
-    {
-        if ($commande_test = commande::find($args["id"])) {
-            switch ($args["data"]) {
-                case "mail":
-                    if (filter_var($args['value'], FILTER_VALIDATE_EMAIL) == !0) {
-                        $commande_test->mail = filter_var($args['value'], FILTER_VALIDATE_EMAIL);
-                        $commande_test->save();
-                    } else {
-                        echo "please use a valid email format";
-                    }
-                    break;
-                case "nom":
-                    $commande_test->nom = filter_var($args['value'], FILTER_SANITIZE_STRING);
-                    $commande_test->save();
-                    break;
-            }
-            $rs = $resp->withStatus(200)
-                ->withHeader('Content-Type', 'application/json;charset=utf-8');
-            $rs->getBody()->write(json_encode($commande_test));
-            return $rs;
-        } else {
-            $rs = $resp->withStatus(404)
-                ->withHeader('Content-Type', 'application/json;charset=utf-8');
-            $rs->getBody()->write(json_encode(['Error_code' => 404, 'please enter an existing id']));
-            return $rs;
+            return Writer::json_error($rs, 400, $e->getMessage());
         }
     }
 }

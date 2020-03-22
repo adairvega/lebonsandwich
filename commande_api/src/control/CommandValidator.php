@@ -10,16 +10,16 @@ class CommandValidator
     {
         return
             [
-                'nom' => v::StringType()->alpha(),
-                'mail' => v::email(),
+                'nom' => v::StringType()->alpha()->notEmpty(),
+                'mail' => v::email()->notEmpty(),
                 'livraison' => [
-                    'date' => v::date('d-m-Y')->min('now'),
-                    'heure' => v::date('H:i'),
+                    'date' => v::date('d-m-Y')->min('now')->notEmpty(),
+                    'heure' => v::date('H:i')->notEmpty(),
                 ],
                 "client_id" => v::optional(v::intVal()),
                 "items" => v::arrayVal()->each(v::arrayVal()
-                    ->key('uri', v::stringType())
-                    ->key('q', v::intVal()))
+                    ->key('uri', v::stringType()->notEmpty())
+                    ->key('q', v::intVal()->notEmpty()))
             ];
     }
 }
