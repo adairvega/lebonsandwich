@@ -118,7 +118,6 @@ class CommandesController
 
     public function insertCommandAuth(Request $req, Response $resp, array $args)
     {
-
         if (!$req->getAttribute('has_errors')) {
             $body = $req->getParsedBody();
             $client_id = $body["client_id"];
@@ -179,9 +178,9 @@ class CommandesController
                 ]));
                 return $rs;
             } else {
-                $rs = $resp->withStatus(404)
+                $rs = $resp->withStatus(400)
                     ->withHeader('Content-Type', 'application/json;charset=utf-8');
-                $rs->getBody()->write(json_encode(['Error_code' => 404, 'Error message' => "token and user id given not corresponding"]));
+                $rs->getBody()->write(json_encode(['Error_code' => 400, 'Error message' => "token and user id given not corresponding"]));
                 return $rs;
             }
         } else {
@@ -236,7 +235,7 @@ class CommandesController
             }
             $commande_test->montant = $prix_commande;
             $commande_test->save();
-            $rs = $resp->withStatus(200)
+            $rs = $resp->withStatus(201)
                 ->withHeader('Location', 'http://api.commande.local:19080/commandes/' . $commande_test->id)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
             $rs->getBody()->write(json_encode([
