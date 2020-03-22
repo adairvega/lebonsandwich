@@ -142,6 +142,7 @@ class CommandesController
                     }
                 }
                 $commande_test = new commande();
+                $client = new \lbs\command\model\Client();
                 $client = \lbs\command\model\Client::find($client_id);
                 $commande_test->id = Uuid::uuid4();
                 $token = random_bytes(32);
@@ -165,7 +166,7 @@ class CommandesController
                 $commande_test->client_id = $client_id;
                 $commande_test->save();
                 $client->save();
-                $rs = $resp->withStatus(200)
+                $rs = $resp->withStatus(201)
                     ->withHeader('Location', 'http://api.commande.local:19080/commandes/' . $commande_test->id)
                     ->withHeader('Content-Type', 'application/json;charset=utf-8');
                 $rs->getBody()->write(json_encode([
@@ -234,7 +235,7 @@ class CommandesController
             }
             $commande_test->montant = $prix_commande;
             $commande_test->save();
-            $rs = $resp->withStatus(200)
+            $rs = $resp->withStatus(201)
                 ->withHeader('Location', 'http://api.commande.local:19080/commandes/' . $commande_test->id)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
             $rs->getBody()->write(json_encode([
