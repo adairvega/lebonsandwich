@@ -10,8 +10,8 @@ class UserValidator
     {
         return
             [
-                'nom_client' => v::StringType()->alpha(),
-                'mail_client' => v::email(),
+                'nom_client' => v::StringType()->alpha()->notEmpty(),
+                'mail_client' => v::email()->notEmpty(),
             ];
     }
 }

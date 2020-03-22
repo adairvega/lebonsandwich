@@ -31,7 +31,7 @@ class UserController
             $rs->getBody()->write(json_encode(["nom client" => $user_nom, "user email" => $user_mail, "user cumul achats" => $user_cumul]));
             return $rs;
         } else {
-            $rs = $resp->withStatus(401)
+            $rs = $resp->withStatus(400)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
             $rs->getBody()->write(json_encode(["user id and JWT no corresponding"]));
             return $rs;
@@ -39,7 +39,7 @@ class UserController
     }
 
 
-    public function userSignin(Request $req, Response $resp, array $args)
+    public function userSignup(Request $req, Response $resp, array $args)
     {
         if (!$req->getAttribute('errors')) {
             $user = new user();
@@ -50,7 +50,7 @@ class UserController
             $user->created_at = date("Y-m-d H:i:s");
             $user->updated_at = date("Y-m-d H:i:s");
             $user->save();
-            $rs = $resp->withStatus(201)
+            $rs = $resp->withStatus(200)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
             $rs->getBody()->write(json_encode("votre compte utilisateur a bien été crée"));
             return $rs;
@@ -60,7 +60,7 @@ class UserController
             foreach ($errors as $error) {
                 $errorsArray["error"][] = $error[0];
             }
-            $rs = $resp->withStatus(401)
+            $rs = $resp->withStatus(400)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
             $rs->getBody()->write(json_encode($errorsArray["error"]));
             return $rs;
@@ -68,7 +68,7 @@ class UserController
     }
 
 
-    public function userSignup(Request $req, Response $resp, array $args)
+    public function userSignin(Request $req, Response $resp, array $args)
     {
         $user_email = $req->getAttribute("user_email");
         $user_password = $req->getAttribute("user_passwd");
@@ -89,9 +89,9 @@ class UserController
                 ]));
                 return $rs;
             } else {
-                $rs = $resp->withStatus(401)
+                $rs = $resp->withStatus(400)
                     ->withHeader('Content-Type', 'application/json;charset=utf-8');
-                $rs->getBody()->write(json_encode(['type' => 'error', 'Error_code' => 401, 'message :' => 'email ou mot de passe incorrect']));
+                $rs->getBody()->write(json_encode(['type' => 'error', 'Error_code' => 400, 'message :' => 'email ou mot de passe incorrect']));
                 return $rs;
             }
         } else {
@@ -119,13 +119,13 @@ class UserController
                 $order["commande"]["nom_client"] = $commande->nom;
                 $orders["commandes"][] = $order;
             }
-            $rs = $resp->withStatus(201)
+            $rs = $resp->withStatus(200)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
             $rs->getBody()->write(json_encode([
                 "commandes" => $orders]));
             return $rs;
         } else {
-            $rs = $resp->withStatus(401)
+            $rs = $resp->withStatus(400)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
             $rs->getBody()->write(json_encode(["user id and JWT no corresponding"]));
             return $rs;
