@@ -1,0 +1,6 @@
+{
+    "name": "api.commande",
+    "version": "0.0.0",
+    "description": "Documentation API Commande",
+    "url" : "http://api.commande.local:19080"
+}

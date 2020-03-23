@@ -20,6 +20,16 @@ class CategoriesController
         $this->c = $c;
     }
 
+    /**
+     * @api {get} http://api.catalogue.local:19180/categories/{id}/{sandwichs} Obtenir la liste des catégories de sandwichs
+     * @apiName getCategorieSandwich
+     * @apiGroup Catégories
+     *
+     * @apiParam {Number} id Categorie unique ID.
+     *
+     * @apiSuccess {Array} categorie Collection des catégories.
+     * @apiSuccess {Array} sandwich  Collection des sandwichs.
+    */
     public function getCategorieSandwich(Request $req, Response $resp, array $args)
     {
         $c = new \MongoDB\Client("mongodb://dbcat");
@@ -54,7 +64,16 @@ class CategoriesController
         return $rs;
     }
 
-
+    /**
+     * @api {get} http://api.catalogue.local:19180/categories/{id} Description d'une catégorie
+     * @apiName getCategorie
+     * @apiGroup Catégories
+     *
+     * @apiParam {Number} id Categorie unique ID.
+     *
+     * @apiSuccess {Array} categorie Description de la catégorie.
+     * @apiSuccess {Array} links  Liens vers la catégorie ou les sandwichs.
+    */
     public function getCategorie(Request $req, Response $resp, array $args)
     {
         $c = new \MongoDB\Client("mongodb://dbcat");
@@ -84,7 +103,16 @@ class CategoriesController
         return $rs;
     }
 
-
+    /**
+     * @api {get} http://api.catalogue.local:19180/sandwich/{uri} Description d'un sandwich
+     * @apiName getNameSandwich
+     * @apiGroup Sandwichs
+     *
+     * @apiParam {String} uri Lien vers le sandwich.
+     *
+     * @apiSuccess {Array} sandwich Description d'un sandwich.
+     *  
+     */
     public function getNameSandwich(Request $req, Response $resp, array $args)
     {
         $c = new \MongoDB\Client("mongodb://dbcat");
@@ -102,7 +130,14 @@ class CategoriesController
         return $rs;
     }
 
-
+    /**
+     * @api {get} http://api.catalogue.local:19180/categories Obtenir toutes les catégories
+     * @apiName getCategories
+     * @apiGroup Catégories
+     *
+     *
+     * @apiSuccess {Array} categorie Liste des catégories.
+    */
     public function getCategories(Request $req, Response $resp, array $args)
     {
         $c = new \MongoDB\Client("mongodb://dbcat");
@@ -120,7 +155,14 @@ class CategoriesController
         return $rs;
     }
 
-
+    /**
+     * @api {get} http://api.catalogue.local:19180/sandwichs Obtenir tous les sandwichs
+     * @apiName getSandwichs
+     * @apiGroup Sandwichs
+     *
+     *
+     * @apiSuccess {Array} sandwichs Liste des sandwichs.
+    */
     public function getSandwichs(Request $req, Response $resp, array $args)
     {
         $c = new \MongoDB\Client("mongodb://dbcat");

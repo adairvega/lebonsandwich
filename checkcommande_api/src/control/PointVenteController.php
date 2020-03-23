@@ -20,6 +20,16 @@ class PointVenteController
         $this->c = $c;
     }
 
+    /**
+     * @api {get} http://api.checkcommande.local:19280/commandes/{id} Description d'une commande
+     * @apiName getCommand
+     * @apiGroup Commandes
+     *
+     * @apiParam {Number} id Commande unique ID.
+     *
+     * @apiSuccess {Array} links  Liens vers la commande ou les items de la commande.
+     * @apiSuccess {Array} command Description de la commande.
+    */
     public function getCommand(Request $req, Response $resp, array $args)
     {
         try {
@@ -53,7 +63,21 @@ class PointVenteController
         }
     }
 
-
+    /**
+     * @api {put} http://api.checkcommande.local:19280/commandes/{id} Modifier l'état d'une commande.
+     * @apiName updateCommand
+     * @apiGroup Commandes
+     * 
+     * 
+     * @apiParam {Number} Id id de la commande.
+     * 
+     
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       "success"
+     *     }
+     */
     public function updateCommand(Request $req, Response $resp, array $args)
     {
         if ($commande = commande::find($args["id"])) {
@@ -87,7 +111,16 @@ class PointVenteController
         }
     }
 
-
+    /**
+     * @api {get} http://api.checkcommande.local:19280/commandes/{id}/{items} Obtenir les items d'une commande.
+     * @apiName getItems
+     * @apiGroup Items
+     *
+     * @apiParam {Number} id Commande unique ID.
+     *
+     * @apiSuccess {String} id  ID de la commande.
+     * @apiSuccess {String} items Items de la commande.
+    */
     public function getItems(Request $req, Response $resp, array $args)
     {
         try {
@@ -109,7 +142,16 @@ class PointVenteController
         }
     }
 
-
+    /**
+     * @api {get} http://api.checkcommande.local:19280/commandes/ Obtenir toutes les commandes.
+     * @apiName getCommands
+     * @apiGroup Commandes
+     * 
+     * 
+     * @apiSuccess {Array} size  Pagination.
+     * @apiSuccess {Array} links  Liens vers la commande ou les items de la commande.
+     * @apiSuccess {Array} command Description de la commande.
+    */
     public function getCommands(Request $req, Response $resp, array $args)
     {
         try {

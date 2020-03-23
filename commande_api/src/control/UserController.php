@@ -16,7 +16,17 @@ class UserController
         $this->c = $c;
     }
 
-
+    /**
+     * @api {get} http://api.commande.local:19080/client/{user_id} Obtenir les données du client.
+     * @apiName userProfiles
+     * @apiGroup User
+     * 
+     * @apiParam    user_id    uuid client.
+     * 
+     * @apiSuccess {String} nom_client Nom du client.
+     * @apiSuccess {Mail} mail_client  Mail du client.
+     * @apiSuccess {Number} cumul_achat Cumul des achats du client.
+    */
     public function userProfile(Request $req, Response $resp, array $args)
     {
         $token = $req->getAttribute("token");
@@ -38,7 +48,27 @@ class UserController
         }
     }
 
-
+    /**
+     * @api {post} http://api.commande.local:19080/client/signup Creation d'un client.
+     * @apiName userSignup
+     * @apiGroup User
+     * @apiExample {curl} Example usage:
+     *     curl -X POST http://api.commande.local:19080/user/signup
+     * @apiParam {String} nom_client Le prenom du client.
+     * @apiParam {String} mail_client l'adresse mail du client.
+     * @apiParam {String} passwd Le mot de passe.
+     * @apiParamExample {json} Request-Example:
+     *     {
+     * "nom_client": "test",
+     * "mail_client": "test@gmail.com",
+     * "passwd": "test"
+     * }
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       "votre compte utilisateur a bien été crée."
+     *     }
+     */
     public function userSignup(Request $req, Response $resp, array $args)
     {
         if (!$req->getAttribute('errors')) {
@@ -67,7 +97,25 @@ class UserController
         }
     }
 
-
+    /**
+     * @api {post} http://api.commande.local:19080/client/signin Connexion client.
+     * @apiName userSignin
+     * @apiGroup User
+     * @apiExample {curl} Example usage:
+     *     curl -X POST http://api.commande.local:19080/user/signin
+     * @apiParam {String} user_mail l'adresse mail du client.
+     * @apiParam {String} user_passwd Le mot de passe.
+     * @apiParamExample {json} Request-Example:
+     *     {
+     *      "user_mail": "test@gmail.com",
+     *       "user_passwd": "test"
+     *      }
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       "token" : "0066a5ddfbade9a009f8d9c09333acd6f146690d88518b494840051494229c8e"
+     *     }.
+     */
     public function userSignin(Request $req, Response $resp, array $args)
     {
         $user_email = $req->getAttribute("user_email");
@@ -99,7 +147,15 @@ class UserController
         }
     }
 
-
+    /**
+     * @api {get} http://api.commande.local:19080/client/{user_id}/{commandes} Obtenir l'historique des commandes d'un client.
+     * @apiName userHistoric
+     * @apiGroup User
+     * 
+     * @apiParam user_id    uuid client.
+     * 
+     * @apiSuccess {Array} commandes Liste de toutes les commandes du client.
+    */
     public function userHistoric(Request $req, Response $resp, array $args)
     {
         $user_id = $args["user_id"];

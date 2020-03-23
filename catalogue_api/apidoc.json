@@ -1,0 +1,6 @@
+{
+    "name": "api.catalogue",
+    "version": "0.0.0",
+    "description": "Documentation API Catalogue",
+    "url" : "http://api.catalogue.local:19180"
+}

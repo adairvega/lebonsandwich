@@ -20,6 +20,14 @@ class CommandesController
         $this->c = $c;
     }
 
+     /**
+     * @api {get} http://api.commande.local:19080/commandes Liste des commandes
+     * @apiName getCommands
+     * @apiGroup Commandes
+     *
+     *
+     * @apiSuccess {Array} command Liste de toutes les commandes.
+    */
     public function getCommands(Request $req, Response $resp, array $args)
     {
         try {
@@ -40,6 +48,16 @@ class CommandesController
         }
     }
 
+     /**
+     * @api {get} http://api.commande.local:19080/commandes/{id} Description d'une commande
+     * @apiName getCommand
+     * @apiGroup Commandes
+     *
+     * @apiParam {Number} id Commande unique ID.
+     *
+     * @apiSuccess {Array} links  Liens vers la commande ou les items de la commande.
+     * @apiSuccess {Array} commande Description de la commande.
+    */
     public function getCommand(Request $req, Response $resp, array $args)
     {
         $id = $args['id'];
@@ -84,7 +102,15 @@ class CommandesController
         }
     }
 
-
+     /**
+     * @api {get} http://api.commande.local:19080/commandes/{id}/{items} Liste des items d'une commande
+     * @apiName getCommandItems
+     * @apiGroup Commandes
+     *
+     * @apiParam {Number} id Commande unique ID.
+     *
+     * @apiSuccess {Array} items  Liste des items d'une commande.
+    */
     public function getCommandItems(Request $req, Response $resp, array $args)
     {
         $id = $args['id'];
@@ -116,6 +142,37 @@ class CommandesController
         }
     }
 
+
+    /**
+     * @api {post} http://api.commande.local:19080/commandes/auth Créer une commande (authentifié).
+     * @apiName insertCommandAuth
+     * @apiGroup Commandes
+     * @apiExample {curl} Example usage:
+     *     curl -X POST http://api.commande.local:19080/commandes/auth
+     * @apiParam {String} nom le nom du client.
+     * @apiParam {String} mail l'adresse mail du client.
+     * @apiParam {date} date Date de livraison.
+     * @apiParam {String} token Token d'authentification.
+     * @apiParam {String} item Quantite des items.
+     * @apiParam {String} uri Lien vers l'item.
+     * @apiParamExample {json} Request-Example:
+     *     {
+     * "nom": "Dubois"
+     * "email": "Dubois@free.fr",
+     * "livraison" : "2020/02/25/ 02:55:02"
+     *  "items" : 
+    *        {
+    *           "uri" : "/sandwichs/s19005"
+    *           "quantite" : "2"
+    *        }
+     *  }
+     * }
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       "token" : "543fc479e422715feb9562809cdd9ca54528426fae2ec0ff2382a32b937555c3"
+     *     }.
+     */
     public function insertCommandAuth(Request $req, Response $resp, array $args)
     {
         if (!$req->getAttribute('has_errors')) {
@@ -191,7 +248,38 @@ class CommandesController
         }
     }
 
-
+    /**
+     * @api {post} http://api.commande.local:19080/commandes/ Créer une commande (non-authentifié).
+     * @apiName insertCommand
+     * @apiGroup Commandes
+     * @apiExample {curl} Example usage:
+     *     curl -X POST http://api.commande.local:19080/commandes/auth
+     * @apiParam {String} nom le nom du client.
+     * @apiParam {String} mail l'adresse mail du client.
+     * @apiParam {date} date Date de livraison.
+     * @apiParam {String} token Token d'authentification.
+     * @apiParam {String} item Quantite des items.
+     * @apiParam {String} uri Lien vers l'item.
+     * @apiParamExample {json} Request-Example:
+     *     {
+     * "nom": "Dubois"
+     * "email": "Dubois@free.fr",
+     * "commande" : 
+     * {
+     * "livraison" : "2020/02/25/ 02:55:02"
+     *  "items" : 
+            * {
+                * "uri" : "/sandwichs/s19005"
+                * "quantite" : "2"
+            * }
+     *  }
+     * }
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       "token" : "543fc479e422715feb9562809cdd9ca54528426fae2ec0ff2382a32b937555c3"
+     *     }.
+     */
     public function insertCommand(Request $req, Response $resp, array $args)
     {
         if (!$req->getAttribute('has_errors')) {

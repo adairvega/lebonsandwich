@@ -1,0 +1,6 @@
+{
+    "name": "api.checkcommande",
+    "version": "0.0.0",
+    "description": "Documentation API Checkcommande",
+    "url" : "http://api.checkcommande.local:19280"
+}
