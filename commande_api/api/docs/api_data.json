@@ -1,4 +1,4 @@
-define({ "api": [
+[
   {
     "type": "get",
     "url": "http://api.commande.local:19080/commandes/{id}",
@@ -164,7 +164,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "    {\n\"nom\": \"Dubois\"\n\"email\": \"Dubois@free.fr\",\n\"commande\" : \n{\n\"livraison\" : \"2020/02/25/ 02:55:02\"\n \"items\" : \n{\n\"uri\" : \"/sandwichs/s19005\"\n\"quantite\" : \"2\"\n}\n }\n}",
+          "content": "    {\n\"nom\": \"Dubois\"\n\"email\": \"Dubois@free.fr\",\n\"commande\" :\n{\n\"livraison\" : \"2020/02/25/ 02:55:02\"\n \"items\" :\n{\n\"uri\" : \"/sandwichs/s19005\"\n\"quantite\" : \"2\"\n}\n }\n}",
           "type": "json"
         }
       ]
@@ -214,6 +214,13 @@ define({ "api": [
           },
           {
             "group": "Parameter",
+            "type": "Number",
+            "optional": false,
+            "field": "client_id",
+            "description": "<p>numero de l'id du client connecte.</p>"
+          },
+          {
+            "group": "Parameter",
             "type": "date",
             "optional": false,
             "field": "date",
@@ -245,7 +252,7 @@ define({ "api": [
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "    {\n\"nom\": \"Dubois\"\n\"email\": \"Dubois@free.fr\",\n\"livraison\" : \"2020/02/25/ 02:55:02\"\n \"items\" : \n       {\n          \"uri\" : \"/sandwichs/s19005\"\n          \"quantite\" : \"2\"\n       }\n }\n}",
+          "content": "{\n\"nom\" : \"jojo\",\n\"mail\": \"jojo@gmail.fr\",\n\"client_id\" : 105,\n\"livraison\" : {\n\"date\": \"7-12-2020\",\n\"heure\": \"12:30\"\n},\n\"items\" : [\n{ \"uri\": \"/sandwichs/s19002\", \"q\": 2}\n]\n}",
           "type": "json"
         }
       ]
@@ -460,4 +467,4 @@ define({ "api": [
     "filename": "src/control/UserController.php",
     "groupTitle": "User"
   }
-] });
+]

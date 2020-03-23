@@ -29,7 +29,7 @@ class CategoriesController
      *
      * @apiSuccess {Array} categorie Collection des catégories.
      * @apiSuccess {Array} sandwich  Collection des sandwichs.
-    */
+     */
     public function getCategorieSandwich(Request $req, Response $resp, array $args)
     {
         $c = new \MongoDB\Client("mongodb://dbcat");
@@ -73,7 +73,7 @@ class CategoriesController
      *
      * @apiSuccess {Array} categorie Description de la catégorie.
      * @apiSuccess {Array} links  Liens vers la catégorie ou les sandwichs.
-    */
+     */
     public function getCategorie(Request $req, Response $resp, array $args)
     {
         $c = new \MongoDB\Client("mongodb://dbcat");
@@ -111,7 +111,7 @@ class CategoriesController
      * @apiParam {String} uri Lien vers le sandwich.
      *
      * @apiSuccess {Array} sandwich Description d'un sandwich.
-     *  
+     *
      */
     public function getNameSandwich(Request $req, Response $resp, array $args)
     {
@@ -137,7 +137,7 @@ class CategoriesController
      *
      *
      * @apiSuccess {Array} categorie Liste des catégories.
-    */
+     */
     public function getCategories(Request $req, Response $resp, array $args)
     {
         $c = new \MongoDB\Client("mongodb://dbcat");
@@ -162,7 +162,7 @@ class CategoriesController
      *
      *
      * @apiSuccess {Array} sandwichs Liste des sandwichs.
-    */
+     */
     public function getSandwichs(Request $req, Response $resp, array $args)
     {
         $c = new \MongoDB\Client("mongodb://dbcat");

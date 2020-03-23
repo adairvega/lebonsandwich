@@ -1,15 +1,15 @@
-{
-  "name": "api.catalogue",
+define({
+  "name": "api.commande",
   "version": "0.0.0",
-  "description": "Documentation API Catalogue",
-  "url": "http://api.catalogue.local:19180",
+  "description": "Documentation API Commande",
+  "url": "http://api.commande.local:19080",
   "sampleUrl": false,
   "defaultVersion": "0.0.0",
   "apidoc": "0.3.0",
   "generator": {
     "name": "apidoc",
-    "time": "2020-03-23T02:37:42.808Z",
+    "time": "2020-03-23T19:41:45.887Z",
     "url": "http://apidocjs.com",
     "version": "0.20.1"
   }
-}
+});

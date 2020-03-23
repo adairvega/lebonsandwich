@@ -102,9 +102,13 @@ composer.phar
 *.ini
 /catalogue_api/src/vendor/
 /commande_api/src/vendor/
+/checkcommande_api/src/vendor/
 /point_vente_api/src/vendor/
 /catalogue_web/src/vendor/
 /catalogue_web/src/templates/*/
 /doc/api.doc/docs/
 .idea/inspectionProfiles/
 doc/internals/
+!catalogue_api/api/docs/vendor/
+!checkcommande_api/api/docs/vendor/
+!commande_api/api/docs/vendor/

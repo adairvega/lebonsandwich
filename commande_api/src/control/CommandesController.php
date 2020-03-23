@@ -20,14 +20,14 @@ class CommandesController
         $this->c = $c;
     }
 
-     /**
+    /**
      * @api {get} http://api.commande.local:19080/commandes Liste des commandes
      * @apiName getCommands
      * @apiGroup Commandes
      *
      *
      * @apiSuccess {Array} command Liste de toutes les commandes.
-    */
+     */
     public function getCommands(Request $req, Response $resp, array $args)
     {
         try {
@@ -48,7 +48,7 @@ class CommandesController
         }
     }
 
-     /**
+    /**
      * @api {get} http://api.commande.local:19080/commandes/{id} Description d'une commande
      * @apiName getCommand
      * @apiGroup Commandes
@@ -57,7 +57,7 @@ class CommandesController
      *
      * @apiSuccess {Array} links  Liens vers la commande ou les items de la commande.
      * @apiSuccess {Array} commande Description de la commande.
-    */
+     */
     public function getCommand(Request $req, Response $resp, array $args)
     {
         $id = $args['id'];
@@ -102,7 +102,7 @@ class CommandesController
         }
     }
 
-     /**
+    /**
      * @api {get} http://api.commande.local:19080/commandes/{id}/{items} Liste des items d'une commande
      * @apiName getCommandItems
      * @apiGroup Commandes
@@ -110,7 +110,7 @@ class CommandesController
      * @apiParam {Number} id Commande unique ID.
      *
      * @apiSuccess {Array} items  Liste des items d'une commande.
-    */
+     */
     public function getCommandItems(Request $req, Response $resp, array $args)
     {
         $id = $args['id'];
@@ -151,21 +151,23 @@ class CommandesController
      *     curl -X POST http://api.commande.local:19080/commandes/auth
      * @apiParam {String} nom le nom du client.
      * @apiParam {String} mail l'adresse mail du client.
+     * @apiParam {Number} client_id numero de l'id du client connecte.
      * @apiParam {date} date Date de livraison.
      * @apiParam {String} token Token d'authentification.
      * @apiParam {String} item Quantite des items.
      * @apiParam {String} uri Lien vers l'item.
      * @apiParamExample {json} Request-Example:
-     *     {
-     * "nom": "Dubois"
-     * "email": "Dubois@free.fr",
-     * "livraison" : "2020/02/25/ 02:55:02"
-     *  "items" : 
-    *        {
-    *           "uri" : "/sandwichs/s19005"
-    *           "quantite" : "2"
-    *        }
-     *  }
+     * {
+     * "nom" : "jojo",
+     * "mail": "jojo@gmail.fr",
+     * "client_id" : 105,
+     * "livraison" : {
+     * "date": "7-12-2020",
+     * "heure": "12:30"
+     * },
+     * "items" : [
+     * { "uri": "/sandwichs/s19002", "q": 2}
+     * ]
      * }
      * @apiSuccessExample Success-Response:
      *     HTTP/1.1 200 OK
@@ -265,14 +267,14 @@ class CommandesController
      *     {
      * "nom": "Dubois"
      * "email": "Dubois@free.fr",
-     * "commande" : 
+     * "commande" :
      * {
      * "livraison" : "2020/02/25/ 02:55:02"
-     *  "items" : 
-            * {
-                * "uri" : "/sandwichs/s19005"
-                * "quantite" : "2"
-            * }
+     *  "items" :
+     * {
+     * "uri" : "/sandwichs/s19005"
+     * "quantite" : "2"
+     * }
      *  }
      * }
      * @apiSuccessExample Success-Response:
