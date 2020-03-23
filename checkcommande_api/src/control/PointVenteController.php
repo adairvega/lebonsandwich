@@ -21,15 +21,43 @@ class PointVenteController
     }
 
     /**
-     * @api {get} http://api.checkcommande.local:19280/commandes/{id} Description d'une commande
+     * @api {get} http://api.checkcommande.local:19280/commandes/{id} Obtenir la description détaillée d'une commande.
      * @apiName getCommand
      * @apiGroup Commandes
      *
-     * @apiParam {Number} id Commande unique ID.
+     * @apiParam {Number} id id unique de la commande.
      *
-     * @apiSuccess {Array} links  Liens vers la commande ou les items de la commande.
-     * @apiSuccess {Array} command Description de la commande.
-    */
+     * @apiExample {curl} Example usage:
+     *     curl http://api.checkcommande.local:19280/commandes/cdf6302b-940b-4348-b913-3cb2052bf042
+     *
+     * @apiSuccess {ressource} Collection description détaillée d'une commande.
+     * @apiSuccessExample {json} Success-Response:
+     *     HTTP/1.1 200 OK
+     *
+     * {
+     *   "type": "resource",
+     *   "links": {
+     *      "self": "http://api.checkcommande.local:19280/commandes/cdf6302b-940b-4348-b913-3cb2052bf042",
+     *      "items": "http://api.checkcommande.local:19280/commandes/cdf6302b-940b-4348-b913-3cb2052bf042/items"
+     * },
+     *  "command": {
+     *      "id": "cdf6302b-940b-4348-b913-3cb2052bf042",
+     *      "created_at": "2019-11-08T13:45:55.000000Z",
+     *      "livraison": "2019-11-08 16:56:15",
+     *      "nom": "Dubois",
+     *      "mail": "Dubois@free.fr",
+     *      "montant": "40.25",
+     *      "items": [
+     *          {
+     *              "uri": "/sandwichs/s19005",
+     *              "libelle": "la mer",
+     *              "tarif": "5.25",
+     *              "quantite": 2
+     *          }
+     *      ]
+     *    }
+     *  }
+     */
     public function getCommand(Request $req, Response $resp, array $args)
     {
         try {
@@ -67,16 +95,32 @@ class PointVenteController
      * @api {put} http://api.checkcommande.local:19280/commandes/{id} Modifier l'état d'une commande.
      * @apiName updateCommand
      * @apiGroup Commandes
-     * 
-     * 
-     * @apiParam {Number} Id id de la commande.
-     * 
-     
+     * @apiExample {curl} Example usage:
+     *     curl -X PUT http://api.checkcommande.local:19280/commandes/d9b0aef8-a42d-439d-a7d3-fa5672d1e1f1/
+     *
+     * @apiParam {Number} Id id de la commande a change.
+     * @apiParamExample {json} Request-Example:
+     *  {
+     *     "status" : 2
+     *   }
      * @apiSuccessExample Success-Response:
      *     HTTP/1.1 200 OK
      *     {
-     *       "success"
-     *     }
+     *       "id": "d9b0aef8-a42d-439d-a7d3-fa5672d1e1f1",
+     *       "created_at": "2020-03-23 22:08:41",
+     *       "updated_at": "2020-03-23 22:54:21",
+     *       "livraison": "2020-03-23 10:08:41",
+     *       "nom": "jojo",
+     *       "mail": "jojo@gmail.fr",
+     *       "montant": "157.50",
+     *       "remise": null,
+     *       "token": "fbaf3a6d7385b3019b82f024b1882ead1dd15fd0a34ad404ce0aa07cb9cd44a8",
+     *       "client_id": null,
+     *       "ref_paiement": null,
+     *       "date_paiement": null,
+     *       "mode_paiement": null,
+     *       "status": 2
+     *    }
      */
     public function updateCommand(Request $req, Response $resp, array $args)
     {
@@ -112,46 +156,40 @@ class PointVenteController
     }
 
     /**
-     * @api {get} http://api.checkcommande.local:19280/commandes/{id}/{items} Obtenir les items d'une commande.
-     * @apiName getItems
-     * @apiGroup Items
-     *
-     * @apiParam {Number} id Commande unique ID.
-     *
-     * @apiSuccess {String} id  ID de la commande.
-     * @apiSuccess {String} items Items de la commande.
-    */
-    public function getItems(Request $req, Response $resp, array $args)
-    {
-        try {
-            $id = $args['id'];
-            $cde = Commande::findOrFail($id);
-            $items = $cde->commandeItems()->get();
-            $rs = $resp->withStatus(200)->withHeader('Content-Type', 'application/json;charset=utf-8');
-            $rs->getBody()->write(json_encode([
-                "type" => "item",
-                "id" => $id,
-                "items" => $items
-            ]));
-            return $rs;
-        } catch (ModelNotFoundException $e) {
-            $rs = $resp->withStatus(400)
-                ->withHeader('Content-Type', 'application/json;charset=utf-8');
-            $rs->getBody()->write(json_encode(['Error_code' => 400, 'Error message' => $e->getMessage()]));
-            return $rs;
-        }
-    }
-
-    /**
-     * @api {get} http://api.checkcommande.local:19280/commandes/ Obtenir toutes les commandes.
+     * @api {get} http://api.checkcommande.local:19280/commandes/ Obtenir la listes de toutes les commandes.
      * @apiName getCommands
      * @apiGroup Commandes
-     * 
-     * 
-     * @apiSuccess {Array} size  Pagination.
-     * @apiSuccess {Array} links  Liens vers la commande ou les items de la commande.
-     * @apiSuccess {Array} command Description de la commande.
-    */
+     *
+     * @apiExample {curl} Example usage:
+     *     curl http://api.checkcommande.local:19280/commandes/
+     *
+     * @apiSuccess {Collection} Collection Description et sandwichs d'une categorie.
+     * @apiSuccessExample {json} Success-Response:
+     *     HTTP/1.1 200 OK
+     * {
+     *   "type": "collection",
+     *   "count": 1515,
+     *   "size": 10,
+     *   "links": 0,
+     *   "categorie": "veggie",
+     *    commandes": [
+     *      {
+     *        "commande": {
+     *           "id": "06d23c7f-3a7d-4499-b7f1-0bb53ae40495",
+     *           "nom": "Collet",
+     *           "created_at": "2019-11-08T13:45:56.000000Z",
+     *           "livraison": "2019-11-09 13:06:06",
+     *           "status": 1
+     *       },
+     *       "links": {
+     *           "self": {
+     *                  "href": "http://api.checkcommande.local:19280/commandes/06d23c7f-3a7d-4499-b7f1-0bb53ae40495"
+     *           }
+     *        }
+     *     }
+     *   ]
+     * }
+     */
     public function getCommands(Request $req, Response $resp, array $args)
     {
         try {
@@ -242,6 +280,54 @@ class PointVenteController
             return $rs;
         } catch (Exception $e) {
             return Writer::json_error($rs, 400, $e->getMessage());
+        }
+    }
+
+    /**
+     * @api {get} http://api.checkcommande.local:19280/commandes/{id}/items Obtenir les items d'une commande.
+     * @apiName getItems
+     * @apiGroup Items
+     *
+     * @apiExample {curl} Example usage:
+     *     curl http://api.checkcommande.local:19280/commandes/d9b0aef8-a42d-439d-a7d3-fa5672d1e1f1/items
+     * @apiParam {Number} id id unique de la commande.
+     * @apiSuccess {item} items les items d'une commande.
+     * @apiSuccessExample {json} Success-Response:
+     *     HTTP/1.1 200 OK
+     *
+     * {
+     *   "type": "item",
+     *   "id": "d9b0aef8-a42d-439d-a7d3-fa5672d1e1f1"
+     *   "items": [
+     *       {
+     *          "id": 6796,
+     *          "uri": "/sandwichs/s19005",
+     *          "libelle": "la mer",
+     *          "tarif": "5.25",
+     *          "quantite": 30,
+     *          "commande_id": "d9b0aef8-a42d-439d-a7d3-fa5672d1e1f1"
+     *          }
+     *       ]
+     *    }
+     */
+    public function getItems(Request $req, Response $resp, array $args)
+    {
+        try {
+            $id = $args['id'];
+            $cde = Commande::findOrFail($id);
+            $items = $cde->commandeItems()->get();
+            $rs = $resp->withStatus(200)->withHeader('Content-Type', 'application/json;charset=utf-8');
+            $rs->getBody()->write(json_encode([
+                "type" => "item",
+                "id" => $id,
+                "items" => $items
+            ]));
+            return $rs;
+        } catch (ModelNotFoundException $e) {
+            $rs = $resp->withStatus(400)
+                ->withHeader('Content-Type', 'application/json;charset=utf-8');
+            $rs->getBody()->write(json_encode(['Error_code' => 400, 'Error message' => $e->getMessage()]));
+            return $rs;
         }
     }
 }

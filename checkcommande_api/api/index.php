@@ -15,12 +15,7 @@ $db->bootEloquent();
 $errors = require 'conf/errors.php';
 $configuration = new \Slim\Container(['settings' => ['displayErrorDetails' => true]]);
 $app_config = array_merge($errors);
-$app = new \Slim\App([
-    'settings' => [
-        'displayErrorDetails' => true,
-        'debug' => true,
-        'whoops.editor' => 'sublime',
-    ]]);
+$app = new \Slim\App();
 
 $app->get('/docs[/]', function (Request $request, Response $response, $args) {
     return $response->write(file_get_contents('docs/index.html'));
@@ -36,10 +31,16 @@ $app->get('/', function (Request $request, Response $response, $args) {
     $response = $response->withHeader("Location", $docURL);
     return $response;
 });
-$app->get('/commandes[/]', \lbs\command\control\PointVenteController::class . ':getCommands');
-$app->get('/commandes/{id}[/]', \lbs\command\control\PointVenteController::class . ':getCommand')->setName('commande_api');
-$app->get('/commandes/{id}/items[/]', \lbs\command\control\PointVenteController::class . ':getItems')->setName('commande_api');
-$app->put('/commandes/{id}', function ($rq, $rs, $args) {
+$app->get('/commandes[/]', function ($rq, $rs, $args) {
+    return (new lbs\command\control\PointVenteController($this))->getCommands($rq, $rs, $args);
+});
+$app->get('/commandes/{id}[/]', function ($rq, $rs, $args) {
+    return (new lbs\command\control\PointVenteController($this))->getCommand($rq, $rs, $args);
+});
+$app->get('/commandes/{id}/items[/]', function ($rq, $rs, $args) {
+    return (new lbs\command\control\PointVenteController($this))->getItems($rq, $rs, $args);
+});
+$app->put('/commandes/{id}[/]', function ($rq, $rs, $args) {
     return (new lbs\command\control\PointVenteController($this))->updateCommand($rq, $rs, $args);
 });
 $app->run();
