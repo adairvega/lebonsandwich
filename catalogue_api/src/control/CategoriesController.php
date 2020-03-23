@@ -21,14 +21,34 @@ class CategoriesController
     }
 
     /**
-     * @api {get} http://api.catalogue.local:19180/categories/{id}/{sandwichs} Obtenir la liste des catégories de sandwichs
+     * @api {get} http://api.catalogue.local:19180/categories/{id}/sandwichs Obtenir la liste des sandwichs d'une catégorie.
      * @apiName getCategorieSandwich
      * @apiGroup Catégories
      *
-     * @apiParam {Number} id Categorie unique ID.
+     * @apiExample {curl} Example usage:
+     *     curl http://api.catalogue.local:19180/categories/1/sandwichs
      *
-     * @apiSuccess {Array} categorie Collection des catégories.
-     * @apiSuccess {Array} sandwich  Collection des sandwichs.
+     * @apiParam {Numero} id numero de la categorie.
+     *
+     * @apiSuccess {Collection} Collection Description et sandwichs d'une categorie.
+     * @apiSuccessExample {json} Success-Response:
+     *     HTTP/1.1 200 OK
+     * {
+     *   "type": "collection",
+     *   "count": 1,
+     *   "size": 1,
+     *   "categorie": "veggie",
+     *   "sandwichs": [
+     *       {
+     *          "sandwich": {
+     *              "ref": "s19007",
+     *              "nom": "le club sandwich",
+     *              "description": "le club sandwich comme à Saratoga : pain toasté, filet de dinde, bacon, laitue, tomate",
+     *              "type_pain": "mie"
+     *              }
+     *          }
+     *      ]
+     *  }
      */
     public function getCategorieSandwich(Request $req, Response $resp, array $args)
     {
@@ -65,14 +85,35 @@ class CategoriesController
     }
 
     /**
-     * @api {get} http://api.catalogue.local:19180/categories/{id} Description d'une catégorie
+     * @api {get} http://api.catalogue.local:19180/categories/{id} Obtenir la description d'une catégorie.
      * @apiName getCategorie
      * @apiGroup Catégories
+     * @apiExample {curl} Example usage:
+     *     curl http://api.catalogue.local:19180/categories/1
      *
-     * @apiParam {Number} id Categorie unique ID.
+     * @apiParam {Numero} id numero de la categorie.
      *
-     * @apiSuccess {Array} categorie Description de la catégorie.
-     * @apiSuccess {Array} links  Liens vers la catégorie ou les sandwichs.
+     * @apiSuccess {resource} categorie Description d'une categorie.
+     * @apiSuccessExample {json} Success-Response:
+     *     HTTP/1.1 200 OK
+     * {
+     *
+     *   "type": "resource",
+     *   "date": "2020-03-23",
+     *   "categorie": {
+     *       "id": 1,
+     *       "nom": "traditionnel",
+     *       "description": "nos sandwiches et boissons classiques"
+     * },
+     * "links": {
+     *     "sandwichs": {
+     *          "href": "http://api.catalogue.local:19180/categories/1/sandwichs/"
+     *      },
+     *      "self": {
+     *      "href": "http://api.catalogue.local:19180/categories/1/"
+     *          }
+     *      }
+     * }
      */
     public function getCategorie(Request $req, Response $resp, array $args)
     {
@@ -87,7 +128,7 @@ class CategoriesController
         }
         $links = array(
             "sandwichs" => array(
-                "href" => "http://api.catalogue.local:19180/categories/" . $id . "/sandwich/",
+                "href" => "http://api.catalogue.local:19180/categories/" . $id . "/sandwichs/",
             ),
             "self" => array(
                 "href" => "http://api.catalogue.local:19180/categories/" . $id . "/",
@@ -104,14 +145,22 @@ class CategoriesController
     }
 
     /**
-     * @api {get} http://api.catalogue.local:19180/sandwich/{uri} Description d'un sandwich
+     * @api {get} http://api.catalogue.local:19180/sandwichs/{uri} Obtenir la description d'un sandwich.
      * @apiName getNameSandwich
      * @apiGroup Sandwichs
+     * @apiExample {curl} Example usage:
+     *     curl http://api.catalogue.local:19180/sandwichs/s19002
      *
-     * @apiParam {String} uri Lien vers le sandwich.
+     * @apiParam {String} uri numero de reference du sandwich.
      *
-     * @apiSuccess {Array} sandwich Description d'un sandwich.
-     *
+     * @apiSuccess {JsonArray} sandwich Description d'un sandwich.
+     * @apiSuccessExample {json} Success-Response:
+     *     HTTP/1.1 200 OK
+     *      {
+     *          "ref": "/sandwichs/s19002",
+     *          "nom": "le jambon-beurre",
+     *          "prix": "4.50"
+     *      }
      */
     public function getNameSandwich(Request $req, Response $resp, array $args)
     {
@@ -131,12 +180,31 @@ class CategoriesController
     }
 
     /**
-     * @api {get} http://api.catalogue.local:19180/categories Obtenir toutes les catégories
+     * @api {get} http://api.catalogue.local:19180/categories Obtenir la liste des catégories de sandwich.
      * @apiName getCategories
      * @apiGroup Catégories
+     * @apiExample {curl} Example usage:
+     *     curl http://api.catalogue.local:19180/categories
      *
-     *
-     * @apiSuccess {Array} categorie Liste des catégories.
+     * @apiSuccess {JsonArray} categories Tableau de toutes les categories.
+     * @apiSuccessExample {json} Success-Response:
+     *     HTTP/1.1 200 OK
+     * [
+     *  {
+     *      "categories": {
+     *          "id": 4,
+     *          "nom": "world",
+     *          "description": "nos produits du monde, à découvrir !"
+     *          }
+     *  },
+     *  {
+     *      "categories": {
+     *      "id": 2,
+     *      "nom": "chaud",
+     *      "description": "nos sandwiches et boissons chaudes"
+     *          }
+     *  }
+     * ]
      */
     public function getCategories(Request $req, Response $resp, array $args)
     {
@@ -156,12 +224,33 @@ class CategoriesController
     }
 
     /**
-     * @api {get} http://api.catalogue.local:19180/sandwichs Obtenir tous les sandwichs
+     * @api {get} http://api.catalogue.local:19180/sandwichs Obtenir la liste des sandwichs du catalogue.
      * @apiName getSandwichs
      * @apiGroup Sandwichs
+     * @apiExample {curl} Example usage:
+     *     curl http://api.catalogue.local:19180/sandwichs
      *
-     *
-     * @apiSuccess {Array} sandwichs Liste des sandwichs.
+     * @apiSuccess {JsonArray} sandwichs tableau de tous les sandwichs.
+     * @apiSuccessExample {json} Success-Response:
+     *     HTTP/1.1 200 OK
+     *      [
+     *          {
+     *              "sandwichs": {
+     *                  "ref": "s19001",
+     *                  "nom": "le bucheron",
+     *                  "description": "un sandwich de bucheron : frites, fromage, saucisse, steack, lard grillés, mayo",
+     *                  "type_pain": "baguette"
+     *              }
+     *          },
+     *          {
+     *              "sandwichs": {
+     *                  "ref": "s19002",
+     *                  "nom": "le jambon-beurre",
+     *                  "description": "le jambon-beurre traditionnel, avec des cornichons",
+     *                  "type_pain": "baguette"
+     *              }
+     *          }
+     *      ]
      */
     public function getSandwichs(Request $req, Response $resp, array $args)
     {
