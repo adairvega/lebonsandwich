@@ -1,5 +1,8 @@
 TD le bon sandwich
 
-Documentation API : 
+Membres du groupe : 
+SEHBAOUI Mouad
+IWA Ségolène
+GONZALEZ-VEGA Adair
+DURON Jonathan
 
-https://documenter.getpostman.com/view/9788113/SzS7Rn2i
