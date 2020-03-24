@@ -21,42 +21,39 @@ class CommandesController
     }
 
     /**
-     * @api {get} http://api.commande.local:19080/commandes Liste des commandes
-     * @apiName getCommands
-     * @apiGroup Commandes
-     *
-     *
-     * @apiSuccess {Array} command Liste de toutes les commandes.
-     */
-    public function getCommands(Request $req, Response $resp, array $args)
-    {
-        try {
-            $cde = \lbs\command\model\Commande::all();
-
-            $rs = $resp->withStatus(200)
-                ->withHeader('Content-Type', 'application/json;charset=utf-8');
-
-            $rs->getBody()->write(json_encode([
-                "type" => "collection",
-                "count" => $cde,
-                "commandes" => $cde]));
-
-            return $rs;
-        } catch (\Exception $e) {
-            echo "HOla";
-            return Writer::json_error($rs, 400, $e->getMessage());
-        }
-    }
-
-    /**
      * @api {get} http://api.commande.local:19080/commandes/{id} Description d'une commande
      * @apiName getCommand
      * @apiGroup Commandes
-     *
+     * @apiExample {curl} Example usage:
+     *     curl http://api.commande.local:19080/commandes/cdf6302b-940b-4348-b913-3cb2052bf042?token=543fc479e422715feb9562809cdd9ca54528426fae2ec0ff2382a32b937555c3
      * @apiParam {Number} id Commande unique ID.
-     *
+     * @apiParam {String} token token de la commande.
      * @apiSuccess {Array} links  Liens vers la commande ou les items de la commande.
      * @apiSuccess {Array} commande Description de la commande.
+     * @apiSuccessExample {json} Success-Response:
+     *     HTTP/1.1 200 OK
+     *     {
+     *     "type": "collection",
+     *     "count": [
+     *              {
+     *                  "id": "cdf6302b-940b-4348-b913-3cb2052bf042",
+     *                  "created_at": "2019-11-08 13:45:55",
+     *                  "updated_at": "2019-11-08 13:45:55",
+     *                  "livraison": "2019-11-08 16:56:15",
+     *                  "nom": "Dubois",
+     *                  "mail": "Dubois@free.fr",
+     *                  "montant": "40.25",
+     *                  "remise": null,
+     *                  "token": "543fc479e422715feb9562809cdd9ca54528426fae2ec0ff2382a32b937555c3",
+     *                  "client_id": null,
+     *                  "ref_paiement": null,
+     *                  "date_paiement": null,
+     *                  "mode_paiement": null,
+     *                  "status": 1
+     *               }
+     *          ]
+     *      }
+     *   }
      */
     public function getCommand(Request $req, Response $resp, array $args)
     {
@@ -147,41 +144,59 @@ class CommandesController
      * @api {post} http://api.commande.local:19080/commandes/auth Créer une commande (authentifié).
      * @apiName insertCommandAuth
      * @apiGroup Commandes
+     * @apiHeaderExample {json} Header-Example:
+     *     {
+     *       "Token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJodHRwOlwvXC9hcGkuYmFja29mZmljZS5sb2NhbCIsImF1ZCI6Imh0dHA6XC9cL2FwaS5iYWNrb2ZmaWNlLmxvY2FsIiwiaWF0IjoxNTg0OTY5NzE3LCJleHAiOjE1ODQ5NzMzMTcsInVpZCI6IjA0MDg5NmVlLTg4M2MtNDBlMi1iNDA1LWVkMGU3NzIyOTlhNCIsImx2bCI6MX0.nhmmDPn-iHWCDVQTNOd1vQXHUG2V9Jw6Uk5Ml3oxooUaRId2wd1Bru1O3WFoUDA9K6MEO_Xp3CGqO3COvGAujw"
+     *     }
      * @apiExample {curl} Example usage:
      *     curl -X POST http://api.commande.local:19080/commandes/auth
      * @apiParam {String} nom le nom du client.
+     * @apiHeader {Bearer_Token}  Authorization JWT du client connecte.
      * @apiParam {String} mail l'adresse mail du client.
      * @apiParam {Number} client_id numero de l'id du client connecte.
-     * @apiParam {date} date Date de livraison.
-     * @apiParam {String} token Token d'authentification.
-     * @apiParam {String} item Quantite des items.
-     * @apiParam {String} uri Lien vers l'item.
+     * @apiParam {Array} livraison Date et heure de la livraison.
+     * @apiParam {Array} items uri et quantite des items souhaite.
+     * @apiSuccess {ressource} commande  retourne les informations de la commande , le montant total et un token pour y acceder.
      * @apiParamExample {json} Request-Example:
-     * {
-     * "nom" : "jojo",
-     * "mail": "jojo@gmail.fr",
-     * "client_id" : 105,
-     * "livraison" : {
-     * "date": "7-12-2020",
-     * "heure": "12:30"
-     * },
-     * "items" : [
-     * { "uri": "/sandwichs/s19002", "q": 2}
-     * ]
-     * }
+     *  {
+     *      "nom" : "test",
+     *      "mail": "test@gmail.fr",
+     *      "client_id" : 105,
+     *      "livraison" : {
+     *          "date": "7-12-2020",
+     *          "heure": "12:30"
+     *      },
+     *       "items" : [
+     *          { "uri": "/sandwichs/s19002", "q": 2}
+     *          ]
+     *   }
      * @apiSuccessExample Success-Response:
      *     HTTP/1.1 200 OK
      *     {
-     *       "token" : "543fc479e422715feb9562809cdd9ca54528426fae2ec0ff2382a32b937555c3"
-     *     }.
+     *          "commande": {
+     *              "nom": "test",
+     *              "mail": "test@gmail.fr",
+     *              "livraison": "2020-03-24 12:07:08"
+     *      },
+     *      "id": "be709896-f625-45b4-9157-ad301b672cea",
+     *      "token": "5f21e110897750f6106a937ea29384ae4955dd4e96d5da7f6fe0ed43b0398266",
+     *      "montant": 15.75,
+     *      "items": [
+     *          {
+     *              "uri": "/sandwichs/s19005",
+     *              "q": 3
+     *          }
+     *      ]
+     * }
      */
     public function insertCommandAuth(Request $req, Response $resp, array $args)
     {
         if (!$req->getAttribute('has_errors')) {
-            $body = $req->getParsedBody();
-            $client_id = $body["client_id"];
-            $client_mail = $body["mail"];
-            $client_nom = $body["nom"];
+            $getBody = $req->getBody();
+            $json = json_decode($getBody, true);
+            $client_id = $json["client_id"];
+            $client_mail = $json["mail"];
+            $client_nom = $json["nom"];
             $token = $req->getAttribute("token");
             $token_uid = $token->uid;
             if ($client_id == $token_uid) {
@@ -256,39 +271,50 @@ class CommandesController
      * @apiName insertCommand
      * @apiGroup Commandes
      * @apiExample {curl} Example usage:
-     *     curl -X POST http://api.commande.local:19080/commandes/auth
+     *     curl -X POST http://api.commande.local:19080/commandes/
      * @apiParam {String} nom le nom du client.
      * @apiParam {String} mail l'adresse mail du client.
-     * @apiParam {date} date Date de livraison.
-     * @apiParam {String} token Token d'authentification.
-     * @apiParam {String} item Quantite des items.
-     * @apiParam {String} uri Lien vers l'item.
+     * @apiParam {Array} livraison Date et heure de la livraison.
+     * @apiParam {Array} items uri et quantite des items souhaite.
      * @apiParamExample {json} Request-Example:
      *     {
-     * "nom": "Dubois"
-     * "email": "Dubois@free.fr",
-     * "commande" :
-     * {
-     * "livraison" : "2020/02/25/ 02:55:02"
-     *  "items" :
-     * {
-     * "uri" : "/sandwichs/s19005"
-     * "quantite" : "2"
+     *      "nom" : "test",
+     *      "mail": "test@gmail.fr",
+     *      "livraison" : {
+     *              "date": "7-12-2020",
+     *              "heure": "12:30"
+     *      },
+     *      "items" : [
+     *          { "uri": "/sandwichs/s19003", "q": 1}
+     *          ]
      * }
-     *  }
-     * }
+     * @apiSuccess {ressource} commande  retourne les informations de la commande , le montant total et un token pour y acceder.
      * @apiSuccessExample Success-Response:
      *     HTTP/1.1 200 OK
      *     {
-     *       "token" : "543fc479e422715feb9562809cdd9ca54528426fae2ec0ff2382a32b937555c3"
-     *     }.
+     *          "commande": {
+     *              "nom": "test",
+     *              "mail": "test@gmail.fr",
+     *              "livraison": "2020-03-24 12:07:08"
+     *      },
+     *      "id": "73011897-6bf1-4231-a021-e78bcd62ddbc",
+     *      "token": "672259ebfe53eda2153d4302f6063b8dc3fc4b7fa1d09f89791bee1994b7bd23",
+     *      "montant": 15.75,
+     *      "items": [
+     *          {
+     *              "uri": "/sandwichs/s19005",
+     *              "q": 3
+     *          }
+     *      ]
+     * }
      */
     public function insertCommand(Request $req, Response $resp, array $args)
     {
         if (!$req->getAttribute('has_errors')) {
-            $body = $req->getParsedBody();
-            $client_mail = $body["mail"];
-            $client_nom = $body["nom"];
+            $getBody = $req->getBody();
+            $json = json_decode($getBody, true);
+            $client_mail = $json["mail"];
+            $client_nom = $json["nom"];
             $client = new Client(["base_uri" => "http://api.catalogue.local"]);
             $prix_commande = 0;
             $getBody = json_decode($req->getBody());

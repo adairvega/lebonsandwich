@@ -15,12 +15,7 @@ $db->bootEloquent();
 $errors = require 'conf/errors.php';
 $configuration = new \Slim\Container(['settings' => ['displayErrorDetails' => true]]);
 $app_config = array_merge($errors);
-$app = new \Slim\App([
-    'settings' => [
-        'displayErrorDetails' => true,
-        'debug' => true,
-        'whoops.editor' => 'sublime',
-    ]]);
+$app = new \Slim\App();
 
 $app->get('/docs[/]', function (Request $request, Response $response, $args) {
     return $response->write(file_get_contents('docs/index.html'));
@@ -40,10 +35,6 @@ $app->get('/', function (Request $request, Response $response, $args) {
 $app->options('/{routes:.+}', function ($request, $response, $args) {
     return $response;
 })->add(\lbs\command\control\Middleware::class . ':headersCORS');
-
-$app->get('/commandes[/]', function ($rq, $rs, $args) {
-    return (new lbs\command\control\CommandesController($this))->getCommands($rq, $rs, $args);
-})->add(lbs\command\control\Middleware::class . ':headersCORS')->add(lbs\command\control\Middleware::class . ':checkHeaderOrigin');
 
 $app->get('/commandes/{id}[/]', function ($rq, $rs, $args) {
     return (new lbs\command\control\CommandesController($this))->getCommand($rq, $rs, $args);

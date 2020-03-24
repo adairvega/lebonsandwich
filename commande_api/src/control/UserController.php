@@ -21,7 +21,7 @@ class UserController
      * @apiName userProfiles
      * @apiGroup User
      *
-     * @apiHeader {Bearer_Token} Token cle unique du client connecte.
+     * @apiHeader {Bearer_Token}  Authorization JWT du client connecte.
      * @apiHeaderExample {json} Header-Example:
      *     {
      *       "Token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJodHRwOlwvXC9hcGkuYmFja29mZmljZS5sb2NhbCIsImF1ZCI6Imh0dHA6XC9cL2FwaS5iYWNrb2ZmaWNlLmxvY2FsIiwiaWF0IjoxNTg0OTY5NzE3LCJleHAiOjE1ODQ5NzMzMTcsInVpZCI6IjA0MDg5NmVlLTg4M2MtNDBlMi1iNDA1LWVkMGU3NzIyOTlhNCIsImx2bCI6MX0.nhmmDPn-iHWCDVQTNOd1vQXHUG2V9Jw6Uk5Ml3oxooUaRId2wd1Bru1O3WFoUDA9K6MEO_Xp3CGqO3COvGAujw"
@@ -65,7 +65,7 @@ class UserController
      * @apiName userSignup
      * @apiGroup User
      * @apiExample {curl} Example usage:
-     *     curl -X POST http://api.commande.local:19080/user/signup
+     *     curl -X POST http://api.commande.local:19080/client/signup
      * @apiParam {String} nom_client Le prenom du client.
      * @apiParam {String} mail_client l'adresse mail du client.
      * @apiParam {String} passwd Le mot de passe.
@@ -112,8 +112,8 @@ class UserController
      * @apiName userSignin
      * @apiGroup User
      * @apiExample {curl} Example usage:
-     *     curl -X POST http://api.commande.local:19080/user/signin
-     * @apiHeader {Basic_Auth}  email_passwd email and password du client.
+     *     curl -X POST http://api.commande.local:19080/client/signin
+     * @apiHeader {Basic_Auth}  Authorization email and password du client.
      * @apiParam {String} user_mail l'adresse mail du client.
      * @apiParam {String} user_passwd Le mot de passe.
      * @apiSuccess {Json} token retourne un JWT au client.
@@ -163,7 +163,7 @@ class UserController
      * @api {get} http://api.commande.local:19080/client/{user_id}/commandes Obtenir l'historique des commandes d'un client.
      * @apiName userHistoric
      * @apiGroup User
-     * @apiHeader {Bearer_Token} Token cle unique du client connecte.
+     * @apiHeader {Bearer_Token}  Authorization JWT du client connecte.
      * @apiHeaderExample {json} Header-Example:
      *     {
      *       "Token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJodHRwOlwvXC9hcGkuYmFja29mZmljZS5sb2NhbCIsImF1ZCI6Imh0dHA6XC9cL2FwaS5iYWNrb2ZmaWNlLmxvY2FsIiwiaWF0IjoxNTg0OTY5NzE3LCJleHAiOjE1ODQ5NzMzMTcsInVpZCI6IjA0MDg5NmVlLTg4M2MtNDBlMi1iNDA1LWVkMGU3NzIyOTlhNCIsImx2bCI6MX0.nhmmDPn-iHWCDVQTNOd1vQXHUG2V9Jw6Uk5Ml3oxooUaRId2wd1Bru1O3WFoUDA9K6MEO_Xp3CGqO3COvGAujw"
@@ -172,7 +172,7 @@ class UserController
      *     curl http://api.commande.local:19080/client/101/commandes
      * @apiParam {Number} user_id id du client.
      *
-     * @apiSuccess {JsonArray} commandes Liste de toutes les commandes du client.
+     * @apiSuccess {Array} commandes Liste de toutes les commandes du client.
      * @apiSuccessExample {json} Success-Response:
      *     HTTP/1.1 200 OK
      *     {

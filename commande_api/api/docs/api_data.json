@@ -5,6 +5,13 @@
     "title": "Description d'une commande",
     "name": "getCommand",
     "group": "Commandes",
+    "examples": [
+      {
+        "title": "Example usage:",
+        "content": "curl http://api.commande.local:19080/commandes/cdf6302b-940b-4348-b913-3cb2052bf042?token=543fc479e422715feb9562809cdd9ca54528426fae2ec0ff2382a32b937555c3",
+        "type": "curl"
+      }
+    ],
     "parameter": {
       "fields": {
         "Parameter": [
@@ -14,6 +21,13 @@
             "optional": false,
             "field": "id",
             "description": "<p>Commande unique ID.</p>"
+          },
+          {
+            "group": "Parameter",
+            "type": "String",
+            "optional": false,
+            "field": "token",
+            "description": "<p>token de la commande.</p>"
           }
         ]
       }
@@ -36,7 +50,14 @@
             "description": "<p>Description de la commande.</p>"
           }
         ]
-      }
+      },
+      "examples": [
+        {
+          "title": "Success-Response:",
+          "content": "  HTTP/1.1 200 OK\n  {\n  \"type\": \"collection\",\n  \"count\": [\n           {\n               \"id\": \"cdf6302b-940b-4348-b913-3cb2052bf042\",\n               \"created_at\": \"2019-11-08 13:45:55\",\n               \"updated_at\": \"2019-11-08 13:45:55\",\n               \"livraison\": \"2019-11-08 16:56:15\",\n               \"nom\": \"Dubois\",\n               \"mail\": \"Dubois@free.fr\",\n               \"montant\": \"40.25\",\n               \"remise\": null,\n               \"token\": \"543fc479e422715feb9562809cdd9ca54528426fae2ec0ff2382a32b937555c3\",\n               \"client_id\": null,\n               \"ref_paiement\": null,\n               \"date_paiement\": null,\n               \"mode_paiement\": null,\n               \"status\": 1\n            }\n       ]\n   }\n}",
+          "type": "json"
+        }
+      ]
     },
     "version": "0.0.0",
     "filename": "src/control/CommandesController.php",
@@ -79,29 +100,6 @@
     "groupTitle": "Commandes"
   },
   {
-    "type": "get",
-    "url": "http://api.commande.local:19080/commandes",
-    "title": "Liste des commandes",
-    "name": "getCommands",
-    "group": "Commandes",
-    "success": {
-      "fields": {
-        "Success 200": [
-          {
-            "group": "Success 200",
-            "type": "Array",
-            "optional": false,
-            "field": "command",
-            "description": "<p>Liste de toutes les commandes.</p>"
-          }
-        ]
-      }
-    },
-    "version": "0.0.0",
-    "filename": "src/control/CommandesController.php",
-    "groupTitle": "Commandes"
-  },
-  {
     "type": "post",
     "url": "http://api.commande.local:19080/commandes/",
     "title": "Créer une commande (non-authentifié).",
@@ -110,7 +108,7 @@
     "examples": [
       {
         "title": "Example usage:",
-        "content": "curl -X POST http://api.commande.local:19080/commandes/auth",
+        "content": "curl -X POST http://api.commande.local:19080/commandes/",
         "type": "curl"
       }
     ],
@@ -133,47 +131,44 @@
           },
           {
             "group": "Parameter",
-            "type": "date",
+            "type": "Array",
             "optional": false,
-            "field": "date",
-            "description": "<p>Date de livraison.</p>"
+            "field": "livraison",
+            "description": "<p>Date et heure de la livraison.</p>"
           },
           {
             "group": "Parameter",
-            "type": "String",
+            "type": "Array",
             "optional": false,
-            "field": "token",
-            "description": "<p>Token d'authentification.</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "item",
-            "description": "<p>Quantite des items.</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "uri",
-            "description": "<p>Lien vers l'item.</p>"
+            "field": "items",
+            "description": "<p>uri et quantite des items souhaite.</p>"
           }
         ]
       },
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "    {\n\"nom\": \"Dubois\"\n\"email\": \"Dubois@free.fr\",\n\"commande\" :\n{\n\"livraison\" : \"2020/02/25/ 02:55:02\"\n \"items\" :\n{\n\"uri\" : \"/sandwichs/s19005\"\n\"quantite\" : \"2\"\n}\n }\n}",
+          "content": "    {\n     \"nom\" : \"test\",\n     \"mail\": \"test@gmail.fr\",\n     \"livraison\" : {\n             \"date\": \"7-12-2020\",\n             \"heure\": \"12:30\"\n     },\n     \"items\" : [\n         { \"uri\": \"/sandwichs/s19003\", \"q\": 1}\n         ]\n}",
           "type": "json"
         }
       ]
     },
     "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "ressource",
+            "optional": false,
+            "field": "commande",
+            "description": "<p>retourne les informations de la commande , le montant total et un token pour y acceder.</p>"
+          }
+        ]
+      },
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\n  \"token\" : \"543fc479e422715feb9562809cdd9ca54528426fae2ec0ff2382a32b937555c3\"\n}.",
+          "content": "    HTTP/1.1 200 OK\n    {\n         \"commande\": {\n             \"nom\": \"test\",\n             \"mail\": \"test@gmail.fr\",\n             \"livraison\": \"2020-03-24 12:07:08\"\n     },\n     \"id\": \"73011897-6bf1-4231-a021-e78bcd62ddbc\",\n     \"token\": \"672259ebfe53eda2153d4302f6063b8dc3fc4b7fa1d09f89791bee1994b7bd23\",\n     \"montant\": 15.75,\n     \"items\": [\n         {\n             \"uri\": \"/sandwichs/s19005\",\n             \"q\": 3\n         }\n     ]\n}",
           "type": "json"
         }
       ]
@@ -188,6 +183,26 @@
     "title": "Créer une commande (authentifié).",
     "name": "insertCommandAuth",
     "group": "Commandes",
+    "header": {
+      "examples": [
+        {
+          "title": "Header-Example:",
+          "content": "{\n  \"Token\": \"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJodHRwOlwvXC9hcGkuYmFja29mZmljZS5sb2NhbCIsImF1ZCI6Imh0dHA6XC9cL2FwaS5iYWNrb2ZmaWNlLmxvY2FsIiwiaWF0IjoxNTg0OTY5NzE3LCJleHAiOjE1ODQ5NzMzMTcsInVpZCI6IjA0MDg5NmVlLTg4M2MtNDBlMi1iNDA1LWVkMGU3NzIyOTlhNCIsImx2bCI6MX0.nhmmDPn-iHWCDVQTNOd1vQXHUG2V9Jw6Uk5Ml3oxooUaRId2wd1Bru1O3WFoUDA9K6MEO_Xp3CGqO3COvGAujw\"\n}",
+          "type": "json"
+        }
+      ],
+      "fields": {
+        "Header": [
+          {
+            "group": "Header",
+            "type": "Bearer_Token",
+            "optional": false,
+            "field": "Authorization",
+            "description": "<p>JWT du client connecte.</p>"
+          }
+        ]
+      }
+    },
     "examples": [
       {
         "title": "Example usage:",
@@ -221,47 +236,44 @@
           },
           {
             "group": "Parameter",
-            "type": "date",
+            "type": "Array",
             "optional": false,
-            "field": "date",
-            "description": "<p>Date de livraison.</p>"
+            "field": "livraison",
+            "description": "<p>Date et heure de la livraison.</p>"
           },
           {
             "group": "Parameter",
-            "type": "String",
+            "type": "Array",
             "optional": false,
-            "field": "token",
-            "description": "<p>Token d'authentification.</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "item",
-            "description": "<p>Quantite des items.</p>"
-          },
-          {
-            "group": "Parameter",
-            "type": "String",
-            "optional": false,
-            "field": "uri",
-            "description": "<p>Lien vers l'item.</p>"
+            "field": "items",
+            "description": "<p>uri et quantite des items souhaite.</p>"
           }
         ]
       },
       "examples": [
         {
           "title": "Request-Example:",
-          "content": "{\n\"nom\" : \"jojo\",\n\"mail\": \"jojo@gmail.fr\",\n\"client_id\" : 105,\n\"livraison\" : {\n\"date\": \"7-12-2020\",\n\"heure\": \"12:30\"\n},\n\"items\" : [\n{ \"uri\": \"/sandwichs/s19002\", \"q\": 2}\n]\n}",
+          "content": "{\n    \"nom\" : \"test\",\n    \"mail\": \"test@gmail.fr\",\n    \"client_id\" : 105,\n    \"livraison\" : {\n        \"date\": \"7-12-2020\",\n        \"heure\": \"12:30\"\n    },\n     \"items\" : [\n        { \"uri\": \"/sandwichs/s19002\", \"q\": 2}\n        ]\n }",
           "type": "json"
         }
       ]
     },
     "success": {
+      "fields": {
+        "Success 200": [
+          {
+            "group": "Success 200",
+            "type": "ressource",
+            "optional": false,
+            "field": "commande",
+            "description": "<p>retourne les informations de la commande , le montant total et un token pour y acceder.</p>"
+          }
+        ]
+      },
       "examples": [
         {
           "title": "Success-Response:",
-          "content": "HTTP/1.1 200 OK\n{\n  \"token\" : \"543fc479e422715feb9562809cdd9ca54528426fae2ec0ff2382a32b937555c3\"\n}.",
+          "content": "    HTTP/1.1 200 OK\n    {\n         \"commande\": {\n             \"nom\": \"test\",\n             \"mail\": \"test@gmail.fr\",\n             \"livraison\": \"2020-03-24 12:07:08\"\n     },\n     \"id\": \"be709896-f625-45b4-9157-ad301b672cea\",\n     \"token\": \"5f21e110897750f6106a937ea29384ae4955dd4e96d5da7f6fe0ed43b0398266\",\n     \"montant\": 15.75,\n     \"items\": [\n         {\n             \"uri\": \"/sandwichs/s19005\",\n             \"q\": 3\n         }\n     ]\n}",
           "type": "json"
         }
       ]
@@ -283,8 +295,8 @@
             "group": "Header",
             "type": "Bearer_Token",
             "optional": false,
-            "field": "Token",
-            "description": "<p>cle unique du client connecte.</p>"
+            "field": "Authorization",
+            "description": "<p>JWT du client connecte.</p>"
           }
         ]
       },
@@ -321,7 +333,7 @@
         "Success 200": [
           {
             "group": "Success 200",
-            "type": "JsonArray",
+            "type": "Array",
             "optional": false,
             "field": "commandes",
             "description": "<p>Liste de toutes les commandes du client.</p>"
@@ -353,8 +365,8 @@
             "group": "Header",
             "type": "Bearer_Token",
             "optional": false,
-            "field": "Token",
-            "description": "<p>cle unique du client connecte.</p>"
+            "field": "Authorization",
+            "description": "<p>JWT du client connecte.</p>"
           }
         ]
       },
@@ -419,7 +431,7 @@
     "examples": [
       {
         "title": "Example usage:",
-        "content": "curl -X POST http://api.commande.local:19080/user/signin",
+        "content": "curl -X POST http://api.commande.local:19080/client/signin",
         "type": "curl"
       }
     ],
@@ -430,7 +442,7 @@
             "group": "Header",
             "type": "Basic_Auth",
             "optional": false,
-            "field": "email_passwd",
+            "field": "Authorization",
             "description": "<p>email and password du client.</p>"
           }
         ]
@@ -496,7 +508,7 @@
     "examples": [
       {
         "title": "Example usage:",
-        "content": "curl -X POST http://api.commande.local:19080/user/signup",
+        "content": "curl -X POST http://api.commande.local:19080/client/signup",
         "type": "curl"
       }
     ],
