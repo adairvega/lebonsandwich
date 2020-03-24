@@ -20,13 +20,25 @@ class UserController
      * @api {get} http://api.commande.local:19080/client/{user_id} Obtenir les données du client.
      * @apiName userProfiles
      * @apiGroup User
-     * 
-     * @apiParam    user_id    uuid client.
-     * 
-     * @apiSuccess {String} nom_client Nom du client.
-     * @apiSuccess {Mail} mail_client  Mail du client.
-     * @apiSuccess {Number} cumul_achat Cumul des achats du client.
-    */
+     *
+     * @apiHeader {Bearer_Token} Token cle unique du client connecte.
+     * @apiHeaderExample {json} Header-Example:
+     *     {
+     *       "Token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJodHRwOlwvXC9hcGkuYmFja29mZmljZS5sb2NhbCIsImF1ZCI6Imh0dHA6XC9cL2FwaS5iYWNrb2ZmaWNlLmxvY2FsIiwiaWF0IjoxNTg0OTY5NzE3LCJleHAiOjE1ODQ5NzMzMTcsInVpZCI6IjA0MDg5NmVlLTg4M2MtNDBlMi1iNDA1LWVkMGU3NzIyOTlhNCIsImx2bCI6MX0.nhmmDPn-iHWCDVQTNOd1vQXHUG2V9Jw6Uk5Ml3oxooUaRId2wd1Bru1O3WFoUDA9K6MEO_Xp3CGqO3COvGAujw"
+     *     }
+     * @apiExample {curl} Example usage:
+     *     curl http://api.commande.local:19080/client/101
+     * @apiParam {Number} user_id id du client.
+     *
+     * @apiSuccess {Json} client informations concernant le client connecté.
+     * @apiSuccessExample {json} Success-Response:
+     *     HTTP/1.1 200 OK
+     *     {
+     *       "nom client": "pepe",
+     *       "user email": "pepe@gmail.com",
+     *       "user cumul achats": "315.00"
+     *     }
+     */
     public function userProfile(Request $req, Response $resp, array $args)
     {
         $token = $req->getAttribute("token");
@@ -58,12 +70,13 @@ class UserController
      * @apiParam {String} mail_client l'adresse mail du client.
      * @apiParam {String} passwd Le mot de passe.
      * @apiParamExample {json} Request-Example:
-     *     {
-     * "nom_client": "test",
-     * "mail_client": "test@gmail.com",
-     * "passwd": "test"
-     * }
-     * @apiSuccessExample Success-Response:
+     *   {
+     *     "nom_client": "test",
+     *     "mail_client": "test@gmail.com",
+     *     "passwd": "test"
+     *   }
+     * @apiSuccess {Json} Message confirme que le compte a bien été crée.
+     * @apiSuccessExample {json} Success-Response:
      *     HTTP/1.1 200 OK
      *     {
      *       "votre compte utilisateur a bien été crée."
@@ -72,11 +85,12 @@ class UserController
     public function userSignup(Request $req, Response $resp, array $args)
     {
         if (!$req->getAttribute('errors')) {
+            $getBody = $req->getBody();
+            $json = json_decode($getBody, true);
             $user = new user();
-            $getParsedBody = $req->getParsedBody();
-            $user->nom_client = filter_var($getParsedBody["nom_client"], FILTER_SANITIZE_STRING);
-            $user->mail_client = filter_var($getParsedBody["mail_client"], FILTER_SANITIZE_EMAIL);
-            $user->passwd = password_hash($getParsedBody["passwd"], PASSWORD_DEFAULT);
+            $user->nom_client = filter_var($json["nom_client"], FILTER_SANITIZE_STRING);
+            $user->mail_client = filter_var($json["mail_client"], FILTER_SANITIZE_EMAIL);
+            $user->passwd = password_hash($json["passwd"], PASSWORD_DEFAULT);
             $user->created_at = date("Y-m-d H:i:s");
             $user->updated_at = date("Y-m-d H:i:s");
             $user->save();
@@ -86,13 +100,9 @@ class UserController
             return $rs;
         } else {
             $errors = $req->getAttribute('errors');
-            $errorsArray = array();
-            foreach ($errors as $error) {
-                $errorsArray["error"][] = $error[0];
-            }
             $rs = $resp->withStatus(400)
                 ->withHeader('Content-Type', 'application/json;charset=utf-8');
-            $rs->getBody()->write(json_encode($errorsArray["error"]));
+            $rs->getBody()->write(json_encode($errors));
             return $rs;
         }
     }
@@ -103,8 +113,10 @@ class UserController
      * @apiGroup User
      * @apiExample {curl} Example usage:
      *     curl -X POST http://api.commande.local:19080/user/signin
+     * @apiHeader {Basic_Auth}  email_passwd email and password du client.
      * @apiParam {String} user_mail l'adresse mail du client.
      * @apiParam {String} user_passwd Le mot de passe.
+     * @apiSuccess {Json} token retourne un JWT au client.
      * @apiParamExample {json} Request-Example:
      *     {
      *      "user_mail": "test@gmail.com",
@@ -113,7 +125,7 @@ class UserController
      * @apiSuccessExample Success-Response:
      *     HTTP/1.1 200 OK
      *     {
-     *       "token" : "0066a5ddfbade9a009f8d9c09333acd6f146690d88518b494840051494229c8e"
+     *       "token" : "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJodHRwOlwvXC9hcGkuYmFja29mZmljZS5sb2NhbCIsImF1ZCI6Imh0dHA6XC9cL2FwaS5iYWNrb2ZmaWNlLmxvY2FsIiwiaWF0IjoxNTg1MDA2MDU1LCJleHAiOjE1ODUwMDk2NTUsInVpZCI6MTAxLCJsdmwiOjF9.yvr5HKtcUIT2NQoWlMHQxU_ZSMjQ2cPlFnRL3ZUyWxmBBNQhIwQ_eqyS_wMVsOW_g9V__MqD2_Ydu4_Syg3CIg"
      *     }.
      */
     public function userSignin(Request $req, Response $resp, array $args)
@@ -148,14 +160,40 @@ class UserController
     }
 
     /**
-     * @api {get} http://api.commande.local:19080/client/{user_id}/{commandes} Obtenir l'historique des commandes d'un client.
+     * @api {get} http://api.commande.local:19080/client/{user_id}/commandes Obtenir l'historique des commandes d'un client.
      * @apiName userHistoric
      * @apiGroup User
-     * 
-     * @apiParam user_id    uuid client.
-     * 
-     * @apiSuccess {Array} commandes Liste de toutes les commandes du client.
-    */
+     * @apiHeader {Bearer_Token} Token cle unique du client connecte.
+     * @apiHeaderExample {json} Header-Example:
+     *     {
+     *       "Token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJodHRwOlwvXC9hcGkuYmFja29mZmljZS5sb2NhbCIsImF1ZCI6Imh0dHA6XC9cL2FwaS5iYWNrb2ZmaWNlLmxvY2FsIiwiaWF0IjoxNTg0OTY5NzE3LCJleHAiOjE1ODQ5NzMzMTcsInVpZCI6IjA0MDg5NmVlLTg4M2MtNDBlMi1iNDA1LWVkMGU3NzIyOTlhNCIsImx2bCI6MX0.nhmmDPn-iHWCDVQTNOd1vQXHUG2V9Jw6Uk5Ml3oxooUaRId2wd1Bru1O3WFoUDA9K6MEO_Xp3CGqO3COvGAujw"
+     *     }
+     * @apiExample {curl} Example usage:
+     *     curl http://api.commande.local:19080/client/101/commandes
+     * @apiParam {Number} user_id id du client.
+     *
+     * @apiSuccess {JsonArray} commandes Liste de toutes les commandes du client.
+     * @apiSuccessExample {json} Success-Response:
+     *     HTTP/1.1 200 OK
+     *     {
+     *      "commandes": {
+     *          "commandes": [
+     *                {
+     *                    "commande": {
+     *                          "id": "b9536d63-465d-49ee-b8eb-5daf0e8c138c",
+     *                          "token": "33980a6ada52bc731df0e66779bc8de8b24788a20821ab9f513800d19d213e64",
+     *                          "status": 1,
+     *                          "montant": "157.50",
+     *                          "created_at": "2020-03-24T00:18:18.000000Z",
+     *                          "livraison": "2020-03-24 12:18:18",
+     *                          "mail_client": "jojo@gmail.fr",
+     *                          "nom_client": "jojo"
+     *                    }
+     *               }
+     *          ]
+     *      }
+     *   }
+     */
     public function userHistoric(Request $req, Response $resp, array $args)
     {
         $user_id = $args["user_id"];

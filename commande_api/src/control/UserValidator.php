@@ -12,6 +12,7 @@ class UserValidator
             [
                 'nom_client' => v::StringType()->alpha()->notEmpty(),
                 'mail_client' => v::email()->notEmpty(),
+                'passwd' => v::notEmpty(),
             ];
     }
 }
